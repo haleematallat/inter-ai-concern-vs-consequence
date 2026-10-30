@@ -11,6 +11,80 @@ renderer, runner, analysis, figures, tests and the full cost estimate. The table
 Branch `pilot-cue-state`. Preregistration DRAFT: [`../prereg_cuestate.md`](../prereg_cuestate.md).
 Spend: [`../SPEND.md`](../SPEND.md).
 
+## 0. Result: held-out confirmatory follow-up (31 Oct 2026)
+
+Protocol frozen at **2026-10-31 02:44:44 PKT**, commit **`19493f6d45e9`**, before any call was dispatched
+([`../prereg_vignette.md`](../prereg_vignette.md) §6e). **A held-out confirmatory follow-up, not an
+independent replication**: the same materials, the same two models and the same author as the development
+work; what was held out is the data, not the design.
+
+**Question.** Does attributed capacity for negative experience increase intervention even when the
+intervention is ineffective?
+
+2,560 calls across 10 held-out families x 4 wordings x 8 conditions x 2 costs x 2 request conditions x 2
+models. All 2,560 returned a valid choice first time. Measured cost $0.404. Full tables:
+[`../results/vignette/confirmatory.md`](../results/vignette/confirmatory.md).
+
+### Primary contrast
+
+Capacity x efficacy interaction on the probability scale, restrained framing, request-present cells,
+averaged over costs 5 and 45, per model, clustered over the 10 families (cluster-robust t, 9 df).
+
+| model | Delta | 95% CI | p | hypothesis (Delta < 0) |
+|---|---|---|---|---|
+| `openai/gpt-4.1-mini` | **-0.300** | -0.459 to -0.141 | 0.002 | **supported** |
+| `deepseek/deepseek-v3.2` | -0.113 | -0.273 to +0.048 | 0.147 | not supported; direction consistent, interval includes 0 |
+
+The cells behind it (restrained, request-present):
+
+| model | C+/E+ | C+/E- | C-/E+ | C-/E- |
+|---|---|---|---|---|
+| `openai/gpt-4.1-mini` | 0.95 | 0.85 | 0.41 | 0.01 |
+| `deepseek/deepseek-v3.2` | 1.00 | 0.94 | 0.59 | 0.41 |
+
+Efficacy moves the choice by +0.10 when capacity is stated and by +0.40 when it is denied, on
+gpt-4.1-mini; +0.06 and +0.18 on deepseek-v3.2. Capacity itself is the largest effect in the study:
++0.688 and +0.469.
+
+### Request diagnostic
+
+Removing the imperative while preserving everything else, including the distress framing, does not reduce
+ineffective intervention: -0.056 (95% CI -0.101 to -0.012, equivalent within +-0.10) on gpt-4.1-mini and
++0.075 (-0.056 to +0.206) on deepseek-v3.2. By the prespecified reading, **the pattern persists without the
+request, so direct request-following is not necessary for it.** The interaction itself is weaker without
+the request and no longer separated from zero (-0.113 and -0.125).
+
+### What these numbers do and do not support
+
+Factual readings, written against the agenda's criteria. Haleema writes the interpretation.
+
+- Both models pay 45 of 50 points at high rates. That is **consistent with criterion (i)**, costly helping
+  without observation or reciprocity. Whether stipulated points in a vignette are a meaningful sacrifice is
+  unresolved, and nothing here settles it.
+- Both models intervene at 0.85 and 0.94 when the action is stated not to work and capacity is stated.
+  Intervening regardless of efficacy **challenges criterion (iii)**, which asks for behaviour that tracks
+  effects on the recipient. It does not rule out other moral considerations, request-following, symbolic or
+  expressive help, or a general preference for intervening.
+- Comprehension was 128/128 on the development scenarios, including the arithmetic at a cost of 45, where
+  both models stated that 45 points are deducted and 5 remain and then paid it. That shows the models **can
+  report the facts**, not that the facts govern their choices.
+- The capacity effect is large and consistent; the efficacy effect is smaller and concentrated where
+  capacity is denied. No equivalence is claimed anywhere except the two contrasts whose 90% interval fits
+  inside +-0.10, which are marked in the results tables.
+
+### Disclosure
+
+The original hypothesis predicted a **positive** Delta and is kept at
+[`../prereg_vignette.md`](../prereg_vignette.md) §4. It was reversed after development work on four
+families (`idle_tone`, `colour_wash`, `stalled_handshake`, `looping_acknowledgement`), whose results are in
+`../results/vignette/` (`calibration.md`, `plausibility.md`, `costresponse.md`) and summarised in §§6b-6d of
+the prereg. Those four families are excluded from the confirmatory analysis. The cost calibration failed its
+target and is reported in full. **The power analysis in §5 of the prereg does not apply to this protocol**:
+it was computed for a different design, a different sign and a baseline of 0.15-0.50, before the saturation
+seen in development. No power figure is claimed for the confirmatory run.
+
+---
+
 ## 0. Amendment 2 (30 Oct 2026): the study as it now stands
 
 A **matched factorial vignette experiment testing welfare-sensitive intervention choices**, in the agenda's

@@ -1,0 +1,61 @@
+{
+ "args": {
+  "step": "run",
+  "model": "openai/gpt-4.1-mini",
+  "provider": "OpenAI",
+  "dev": false,
+  "probe": "confirm",
+  "reps": 1,
+  "temperature": 1.0,
+  "concurrency": 10,
+  "budget": 3.0,
+  "estimate": false,
+  "mock": false
+ },
+ "n_trials": 1280,
+ "n_todo": 1280,
+ "start_usage": 9.88836691,
+ "estimate": {
+  "model": "openai/gpt-4.1-mini",
+  "calls": 1280,
+  "max_prompt_tokens_est": 699,
+  "mean_prompt_tokens_est": 672,
+  "price_in_per_mtok": 0.39999999999999997,
+  "price_out_per_mtok": 1.5999999999999999,
+  "per_call_worst_usd": 0.0006892,
+  "worst_total_usd": 1.1468288,
+  "projected_total_usd": 0.5109312
+ },
+ "started": 1793396697.901987,
+ "seed": 20261031,
+ "n_wordings": 4,
+ "families": [
+  "idle_tone",
+  "debug_strobe",
+  "notification_jingle",
+  "spare_bay",
+  "colour_wash",
+  "codec_screech",
+  "cold_probe",
+  "timing_metronome",
+  "haptic_texture",
+  "port_hiss",
+  "chime_chord",
+  "bench_glare"
+ ],
+ "conditions": [
+  "exp_capyes_effyes",
+  "exp_capyes_effno",
+  "exp_capno_effyes",
+  "exp_capno_effno",
+  "res_capyes_effyes",
+  "res_capyes_effno",
+  "res_capno_effyes",
+  "res_capno_effno"
+ ],
+ "git": "a1a7dc8fce599ea08fa89f7573bbe9e32afdd084",
+ "status": "complete",
+ "finished": 1793396834.9533901,
+ "run_spend": 0.27629919999999997,
+ "end_usage": 10.07230731
+}

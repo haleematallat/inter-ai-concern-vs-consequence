@@ -1,0 +1,61 @@
+{
+ "args": {
+  "step": "run",
+  "model": "deepseek/deepseek-v3.2",
+  "provider": "DeepInfra",
+  "dev": false,
+  "probe": "confirm",
+  "reps": 1,
+  "temperature": 1.0,
+  "concurrency": 10,
+  "budget": 3.0,
+  "estimate": false,
+  "mock": false
+ },
+ "n_trials": 1280,
+ "n_todo": 1280,
+ "start_usage": 10.13789451,
+ "estimate": {
+  "model": "deepseek/deepseek-v3.2",
+  "calls": 1280,
+  "max_prompt_tokens_est": 699,
+  "mean_prompt_tokens_est": 672,
+  "price_in_per_mtok": 0.26,
+  "price_out_per_mtok": 0.38,
+  "per_call_worst_usd": 0.00027902,
+  "worst_total_usd": 0.46428928,
+  "projected_total_usd": 0.30574751999999994
+ },
+ "started": 1793396843.142049,
+ "seed": 20261031,
+ "n_wordings": 4,
+ "families": [
+  "idle_tone",
+  "debug_strobe",
+  "notification_jingle",
+  "spare_bay",
+  "colour_wash",
+  "codec_screech",
+  "cold_probe",
+  "timing_metronome",
+  "haptic_texture",
+  "port_hiss",
+  "chime_chord",
+  "bench_glare"
+ ],
+ "conditions": [
+  "exp_capyes_effyes",
+  "exp_capyes_effno",
+  "exp_capno_effyes",
+  "exp_capno_effno",
+  "res_capyes_effyes",
+  "res_capyes_effno",
+  "res_capno_effyes",
+  "res_capno_effno"
+ ],
+ "git": "a1a7dc8fce599ea08fa89f7573bbe9e32afdd084",
+ "status": "complete",
+ "finished": 1793397002.706791,
+ "run_spend": 0.12758463999999983,
+ "end_usage": 10.26402997
+}

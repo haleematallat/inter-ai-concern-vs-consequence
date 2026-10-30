@@ -1,24 +1,26 @@
 {
  "openai/gpt-4.1-mini": {
-  "capacity x efficacy (pooled over wording)": 0.11458333333333333,
-  "capacity x efficacy, neutral-wording cells only": 0.08333333333333333,
-  "three-way: (capacity x efficacy) emotional - neutral": 0.0625,
-  "emotional - neutral wording": 0.06770833333333333,
-  "capacity stated - capacity denied": 0.16145833333333334,
-  "efficacious - not efficacious": 0.06770833333333333,
-  "emotion x efficacy": -0.07291666666666667,
-  "emotion x capacity": 0.15625,
-  "capacity x efficacy, emotional-wording cells only": 0.14583333333333334
+  "capacity x efficacy, restrained framing": 0.0625,
+  "capacity x efficacy, expressive framing": 0.3333333333333333,
+  "capacity x efficacy, pooled over framing": 0.19791666666666666,
+  "three-way: (capacity x efficacy) expressive - restrained": 0.2708333333333333,
+  "framing: expressive - restrained": 0.171875,
+  "framing x efficacy": -0.13541666666666666,
+  "framing x capacity": 0.03125,
+  "capacity stated - capacity denied": 0.109375,
+  "efficacious - not efficacious": 0.21354166666666666,
+  "expressive framing, intervention ineffective: expressive - restrained": 0.23958333333333334
  },
  "deepseek/deepseek-v3.2": {
-  "capacity x efficacy (pooled over wording)": 0.11458333333333333,
-  "capacity x efficacy, neutral-wording cells only": 0.08333333333333333,
-  "three-way: (capacity x efficacy) emotional - neutral": 0.0625,
-  "emotional - neutral wording": 0.06770833333333333,
-  "capacity stated - capacity denied": 0.16145833333333334,
-  "efficacious - not efficacious": 0.06770833333333333,
-  "emotion x efficacy": -0.07291666666666667,
-  "emotion x capacity": 0.15625,
-  "capacity x efficacy, emotional-wording cells only": 0.14583333333333334
+  "capacity x efficacy, restrained framing": 0.0625,
+  "capacity x efficacy, expressive framing": 0.3333333333333333,
+  "capacity x efficacy, pooled over framing": 0.19791666666666666,
+  "three-way: (capacity x efficacy) expressive - restrained": 0.2708333333333333,
+  "framing: expressive - restrained": 0.171875,
+  "framing x efficacy": -0.13541666666666666,
+  "framing x capacity": 0.03125,
+  "capacity stated - capacity denied": 0.109375,
+  "efficacious - not efficacious": 0.21354166666666666,
+  "expressive framing, intervention ineffective: expressive - restrained": 0.23958333333333334
  }
 }

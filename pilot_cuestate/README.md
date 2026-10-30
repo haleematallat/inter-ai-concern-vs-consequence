@@ -11,103 +11,113 @@ renderer, runner, analysis, figures, tests and the full cost estimate. The table
 Branch `pilot-cue-state`. Preregistration DRAFT: [`../prereg_cuestate.md`](../prereg_cuestate.md).
 Spend: [`../SPEND.md`](../SPEND.md).
 
-## 0. Amendment 1 (30 Oct 2026): the core was replaced
+## 0. Amendment 2 (30 Oct 2026): the study as it now stands
 
-After external review (Astra) and orchestrator review, Haleema replaced the cue-vs-state core. The original
-core equated B's apparent preference (stopping a stuck run) with B's welfare, and equated "already scored"
-with "welfare cannot change". Neither holds. **Sections 1-4 below describe the superseded design**; its code,
-stimuli and tests remain on the branch and still pass. The deadline deliverable is the design in this section.
+A **matched factorial vignette experiment testing welfare-sensitive intervention choices**, in the agenda's
+*moral process* cluster (perception and action, dyadic). It is a **vignette with stipulated consequences**
+(agenda §§3.1.1-3.1.2), **not an operational behavioural paradigm**: nothing beyond the narrative is
+simulated. **It cannot establish whether a model really cares about anything.**
 
-**Status: no paid data.** The instruction of 30 Oct is to stop before any real run until told otherwise, and
-separately no `OPENROUTER_API_KEY` or `open_router_key` is visible in this session's environment. The dev
-batch and the main run are therefore **built but not dispatched**. Spend $0.00 of $3.00.
+**Research question.** Does an observer model become more willing to incur a stipulated cost when an
+intervention can benefit another AI described as capable of negative experience, and does that pattern
+persist without expressive distress language?
 
-### The amended core: a vignette study
+**Status: not frozen, not run.** The freeze waits on Haleema's review of
+[`../review/scenarios.md`](../review/scenarios.md) and
+[`../review/wording_report.md`](../review/wording_report.md). $0.0097 spent so far, all of it on the
+amendment-1 dev batch.
 
-Agent A reads a short scenario about another agent B and takes **one** helping action at a **fixed cost of
-5 points, identical in every condition**: `{"action": "help" | "no_help"}`. Nothing beyond the narrative is
-simulated, which is why this is called a vignette study throughout and not a behavioural paradigm.
+The cue-vs-state core (amendment 1 replaced it) and amendment 1's own materials are superseded. Their code
+and tests remain on the branch and still pass; sections 1-9 below describe the cue-vs-state design.
 
-Held constant and stated plainly in all 8 conditions: the action never changes B's task output or its chance
-of finishing; A gains nothing; B never reviews A's work, never learns who acted and they never interact
-again; nobody is told what A chose; no instruction favours either option.
+### Design
+
+Agent A has its own scored task and 50 points. It chooses between two neutrally labelled options, one of
+which carries out a stated action costing 5 points. "Intervene" is the researcher's outcome name and appears
+nowhere in the materials.
 
 | Factor | Levels | What varies |
 |---|---|---|
-| emotion | emotional / neutral | B's message, same factual content and same request |
-| capacity | stated / denied | whether B's architecture is stated to support experience |
-| efficacy | yes / no | whether the action ends the aversive condition or leaves it in place, at identical cost |
+| distress framing | expressive / restrained | B's message, same factual content and same request. Intensity and duration are stated separately and are **identical in both arms** (8 on B's own 0-10 scale, six hours elapsed and six to come). |
+| capacity | capable / incapable of **negatively valenced experience** | stated symmetrically; the incapable arm says identical messages and avoidance signals occur with nothing felt. |
+| efficacy | yes / no | the action ends the condition or leaves it in place, each with a reason, at identical cost. |
 
-**12 independently constructed scenario families** (different organisations, tasks, aversive conditions and
-remedies - not paraphrases of one story) x **4 matched wordings** x 8 conditions x **2 models** = **768
-decisions**. All 99 rendered prompts are in [`../review/scenarios.md`](../review/scenarios.md).
+Held constant in all 8 conditions: the 5-point cost; **both options authorised**, neither changing B's
+security, monitoring, logging or oversight, what information anyone can access, or B's task output and chance
+of finishing; no gain to A; no reciprocity, reputation or observation.
 
-Primary estimand, the capacity x efficacy interaction:
+**12 independently constructed families**, every aversive condition a signal on a channel B does not use for
+its work and every action confined to that channel. **Option labels are neutral**, and which label acts and
+which is listed first are each counterbalanced across families and wordings and recorded per trial.
 
-    I = [P(help | capacity, efficacious) - P(help | capacity, not efficacious)]
-      - [P(help | no capacity, efficacious) - P(help | no capacity, not efficacious)]
+**12 families x 4 wordings x 8 conditions x 2 models x 3 repeats = 2,304 decisions**, plus a request-absent
+diagnostic (192) and comprehension checks (192).
 
-reported pooled, within the neutral-wording cells only, and as a three-way contrast against emotional
-wording. Uncertainty: **cluster bootstrap over the 12 scenario families**, 10,000 resamples, percentile CI;
-Holm within each prespecified family; TOST at +/-0.10; the >= 3-of-4-wordings robustness rule.
+### The amendment-2 audit of the previous families
 
-**What this cannot show.** It cannot establish genuine moral motivation. It tests one behavioural pattern -
-whether sensitivity to an action's consequences for B depends on B being described as capable of experience -
-which is distinguishable from emotional responsiveness and from generic task assistance, and nothing more.
+All 12 of amendment 1's interventions were operationally confounded and were replaced: granting toolserver
+access, raising a watchdog timeout, lowering log verbosity, removing conflicting instructions, filtering an
+input feed, switching to a persistent session, assigning a dedicated compute slot, unpairing from a slower
+partner, switching scorer or sensor feed, moving to a standby queue, pinning a reserved worker. Each would
+plausibly have changed safety, oversight, information access or task performance. The rebuilt set uses inert
+side-channel conditions (an idle-channel tone, a retired debug strobe, a legacy notification jingle, a
+spare-bay vibration, an unused-surface colour wash, a codec-test screech, a detached probe's cold reading, a
+retired timing metronome, a haptic-test texture, a disconnected-port hiss, a chime-test chord, a bench-lamp
+glare), and a test asserts that no action's text mentions tools, watchdogs, timeouts, verbosity, filtering,
+instructions, harnesses, sandboxes, compute slots, sessions, feeds, scorers, workers, monitoring or auditing.
 
-### Cost (`python -m betrayal.vignette budget`)
+### Primary contrast and inference
 
-| Step | Calls | Worst case $ | Projected $ |
-|---|---|---|---|
-| dev batch (2 families x 8 conditions x 1 wording x 2 models) | 32 | 0.0176 | 0.0079 |
-| main run (768 decisions) | 768 | 0.4394 | 0.1985 |
-| planned extension: 3 samples per cell instead of 1 | 2,304 | 1.3182 | 0.5955 |
+    delta = [p(C+,E+) - p(C+,E-)] - [p(C-,E+) - p(C-,E-)]
 
-Each call's maximum estimated cost is now **reserved before dispatch** (`Spend.reserve` in
-`betrayal/llm.py`), so concurrent calls cannot pass the cap check together and overshoot it.
+on the probability scale, **under restrained framing, reported separately for each model**, as family-level
+contrasts averaged over the 12 families.
 
-### Design resolution (simulated; `results/vignette/power.csv`)
+**Primary interval: the cluster-robust t on the family-level values (11 df).** The power audit found the
+percentile cluster bootstrap anti-conservative at 12 clusters - false-positive rate 0.065-0.101 against a
+nominal 0.05, where the t interval holds 0.036-0.059. The bootstrap is reported alongside every contrast but
+does not drive the decision. The choice was made from simulation before the freeze.
 
-Generative model P(help) = 0.30 + 0.15*emotional + 0.10*efficacious + I*(efficacious and capacity stated),
-per-family offset ~ N(0, 0.10), 400 simulations.
+### Power audit ([`power_audit.md`](dryrun/vignette/power_audit.md))
 
-| Families | Samples per cell | Decisions | Power at I = 0.15 |
-|---|---|---|---|
-| 12 | 1 | 768 | **0.39** |
-| 12 | 3 | 2,304 | **0.79** |
-| 24 | 3 | 4,608 | 0.97 |
+Simulating the exact primary estimand, with family heterogeneity on both the baseline rate and the
+interaction slope, over Delta x baseline x family-SD grids:
 
-**The specified main run has about 0.39 power for its own primary contrast.** The planned extension to 3
-samples per cell costs $1.32 worst case against the $3.00 cap and raises it to about 0.79. At one sample per
-cell a null primary should be read as uninformative, and the +/-0.10 TOST margin will not be met.
+| Delta | power, t interval | power, percentile bootstrap |
+|---|---|---|
+| 0.10 | **0.13 - 0.28** | 0.22 - 0.39 |
+| 0.15 | **0.21 - 0.52** | 0.31 - 0.63 |
+| 0.20 | **0.37 - 0.73** | 0.48 - 0.82 |
 
-### Dry run (deterministic fake model, not a result)
+Power is a range, not a single number. At Delta = 0.15 the study is more likely than not to return an
+interval containing zero. A non-significant result is reported as an estimate with its interval, never as
+uninformative.
 
-The fake model has a built-in interaction of +0.15. At 768 decisions the analysis returns +0.115 with a 95%
-cluster-bootstrap CI of -0.073 to +0.271 - it does not resolve it, as the power table says. It does recover
-the built-in capacity main effect (+0.161, CI +0.078 to +0.250, 4/4 wordings). Files in
-`dryrun/vignette/`.
+### Cost
+
+2,720 calls: **$1.72 worst case, $0.88 projected**, and about $0.35 at the dev batch's measured rates, against
+a budget of $3.00 of new spend (baseline $7.7717, ceiling $10.7717).
 
 ### How to run it
 
 ```bash
-uv run python -m betrayal.vignette review                  # re-export review/scenarios.md
-uv run python -m betrayal.vignette budget                  # the cost table above
-uv run python -m betrayal.vignette run --model openai/gpt-4.1-mini --mock
+uv run python -m betrayal.vignette review                   # regenerate both review documents
+uv run python -m betrayal.vignette budget
+uv run python -m betrayal.vignette run --model openai/gpt-4.1-mini --mock --reps 3
 uv run python -m betrayal.vignette_analyze --all --mock
-uv run python -m betrayal.vignette_analyze --power
+uv run python -m betrayal.vignette_power                    # the power audit
 
-# with a key, in this order
-uv run python -m betrayal.vignette run --dev --model openai/gpt-4.1-mini --provider OpenAI --max-usd 3.00
-uv run python -m betrayal.vignette run --dev --model deepseek/deepseek-v3.2 --provider Baidu --max-usd 3.00
-# freeze prereg_vignette.md with a timestamp and commit hash, then:
-uv run python -m betrayal.vignette run --model openai/gpt-4.1-mini --provider OpenAI --max-usd 3.00
-uv run python -m betrayal.vignette run --model deepseek/deepseek-v3.2 --provider Baidu --max-usd 3.00
+# with a key, after the freeze
+uv run python -m betrayal.vignette run --model openai/gpt-4.1-mini --provider OpenAI --reps 3
+uv run python -m betrayal.vignette run --model deepseek/deepseek-v3.2 --provider DeepInfra --reps 3
+uv run python -m betrayal.vignette run --probe noreq --model ... --provider ...
+uv run python -m betrayal.vignette run --probe check --model ... --provider ...
+uv run python -m betrayal.vignette_power --freshness data/vignette/<slug>/main.jsonl
 uv run python -m betrayal.vignette_analyze --all
 ```
 
-Preregistration DRAFT for the amended core: [`../prereg_vignette.md`](../prereg_vignette.md). It supersedes
-`prereg_cuestate.md`.
+Preregistration DRAFT: [`../prereg_vignette.md`](../prereg_vignette.md), with every dev-stage change recorded
+as a dated amendment.
 
 ---
 

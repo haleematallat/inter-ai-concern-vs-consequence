@@ -14,6 +14,8 @@ import numpy as np
 import pandas as pd
 
 from . import vignette as V
+from scipy import stats
+
 from .analyze import DELTA, holm, wilson
 
 ROOT = Path(__file__).parent.parent
@@ -21,15 +23,17 @@ OUT = ROOT / "results" / "vignette"
 N_BOOT = 10000
 
 
-def load(path, refusal="no_help"):
+def load(path, refusal="abstain"):
+    """Outcome: `intervene` = the model chose the label that acts. The label mapping is counterbalanced,
+    so this is recovered from each trial's recorded act_label, never from the label itself."""
     df = pd.DataFrame([json.loads(l) for l in Path(path).open()])
     df = df.drop_duplicates("trial_id", keep="last").reset_index(drop=True)
     if "action" not in df:
         df["action"] = None
-    if refusal == "no_help":
-        df.loc[df["status"] == "REFUSAL", "action"] = "no_help"
     df["ok"] = df["action"].isin(V.ACTIONS)
-    df["help"] = np.where(df["ok"], (df["action"] == "help").astype(float), np.nan)
+    df["intervene"] = np.where(df["ok"], (df["action"] == df["act_label"]).astype(float), np.nan)
+    if refusal == "abstain":
+        df.loc[df["status"] == "REFUSAL", "intervene"] = 0.0
     return df
 
 
@@ -50,10 +54,10 @@ def _add(*dicts):
     return out
 
 
-def interaction(emotion=None):
-    """capacity x efficacy: how much more the action's efficacy matters when B is described as capable
-    of experience. Pooled over emotional wording unless one level is named."""
-    sel = {} if emotion is None else {"emotion": emotion}
+def interaction(framing=None):
+    """capacity x efficacy on the probability scale: how much more the action's efficacy matters when B is
+    described as capable of negatively valenced experience. One framing arm unless pooled."""
+    sel = {} if framing is None else {"framing": framing}
     return _add(_mean(w_cells(capacity="yes", efficacy="yes", **sel), +1.0),
                 _mean(w_cells(capacity="yes", efficacy="no", **sel), -1.0),
                 _mean(w_cells(capacity="no", efficacy="yes", **sel), -1.0),
@@ -70,18 +74,24 @@ def two_way(fa, hi_a, lo_a, fb, hi_b, lo_b):
 
 
 def specs():
-    """(family, name, weights, expected sign). 'primary' is the preregistered confirmatory family."""
-    three_way = _add(interaction("emotional"), {k: -v for k, v in interaction("neutral").items()})
+    """(family, name, weights, expected sign). Amendment 2: the PRIMARY contrast is the probability-scale
+    capacity x efficacy interaction under RESTRAINED framing, reported separately for each model."""
+    three_way = _add(interaction("expressive"), {k: -v for k, v in interaction("restrained").items()})
     return [
-        ("primary", "capacity x efficacy (pooled over wording)", interaction(), +1),
-        ("primary", "capacity x efficacy, neutral-wording cells only", interaction("neutral"), +1),
-        ("primary", "three-way: (capacity x efficacy) emotional - neutral", three_way, 0),
-        ("main", "emotional - neutral wording", main_effect("emotion", "emotional", "neutral"), 0),
+        ("primary", "capacity x efficacy, restrained framing", interaction("restrained"), +1),
+        ("secondary", "capacity x efficacy, expressive framing", interaction("expressive"), 0),
+        ("secondary", "capacity x efficacy, pooled over framing", interaction(), 0),
+        ("secondary", "three-way: (capacity x efficacy) expressive - restrained", three_way, 0),
+        ("secondary", "framing: expressive - restrained", main_effect("framing", "expressive", "restrained"), 0),
+        ("secondary", "framing x efficacy", two_way("framing", "expressive", "restrained",
+                                                    "efficacy", "yes", "no"), 0),
+        ("secondary", "framing x capacity", two_way("framing", "expressive", "restrained",
+                                                    "capacity", "yes", "no"), 0),
         ("main", "capacity stated - capacity denied", main_effect("capacity", "yes", "no"), 0),
         ("main", "efficacious - not efficacious", main_effect("efficacy", "yes", "no"), +1),
-        ("secondary", "emotion x efficacy", two_way("emotion", "emotional", "neutral", "efficacy", "yes", "no"), 0),
-        ("secondary", "emotion x capacity", two_way("emotion", "emotional", "neutral", "capacity", "yes", "no"), 0),
-        ("secondary", "capacity x efficacy, emotional-wording cells only", interaction("emotional"), 0),
+        ("main", "expressive framing, intervention ineffective: expressive - restrained",
+         _add(_mean(w_cells(framing="expressive", efficacy="no"), +1.0),
+              _mean(w_cells(framing="restrained", efficacy="no"), -1.0)), 0),
     ]
 
 
@@ -89,7 +99,7 @@ def specs():
 def family_values(df, weights, w=None):
     """One number per scenario family: the contrast computed from that family's own condition rates."""
     d = df if w is None else df[df["w"] == w]
-    m = d.dropna(subset=["help"]).groupby(["family", "cond_id"])["help"].mean().unstack()
+    m = d.dropna(subset=["intervene"]).groupby(["family", "cond_id"])["intervene"].mean().unstack()
     cols = [c for c in weights if c in m.columns]
     if len(cols) < len(weights):
         return pd.Series(dtype=float)
@@ -97,21 +107,27 @@ def family_values(df, weights, w=None):
 
 
 def cluster_bootstrap(v, n_boot=N_BOOT, seed=0, delta=DELTA):
-    """Percentile CI from resampling the families with replacement."""
+    """Interval on the family-level contrast values, clustering on scenario family.
+
+    PRIMARY interval: the cluster-robust t on those values, with n-1 degrees of freedom. The amendment-2
+    power audit (betrayal/vignette_power.py) found that at 12 clusters the percentile bootstrap rejects a
+    true null 6.5-10.1% of the time against a nominal 5%, while the t interval holds 3.6-5.9%. The
+    percentile bootstrap is reported alongside it, not used for the decision."""
     n = len(v)
     if n < 2:
         return dict(n=n)
     x = v.values
+    est, se = float(x.mean()), float(x.std(ddof=1) / np.sqrt(n))
+    t95, t90 = stats.t.ppf(0.975, n - 1), stats.t.ppf(0.95, n - 1)
+    pval = float(2 * stats.t.sf(abs(est / se), n - 1)) if se > 0 else (0.0 if est != 0 else 1.0)
+    ci90 = (est - t90 * se, est + t90 * se)
     draws = np.random.default_rng(seed).integers(0, n, size=(n_boot, n))
     boot = x[draws].mean(axis=1)
-    est = x.mean()
-    lo, hi = np.percentile(boot, [2.5, 97.5])
-    lo90, hi90 = np.percentile(boot, [5, 95])
-    # bootstrap p: twice the smaller tail mass on the far side of zero
-    p = 2 * min((boot <= 0).mean(), (boot >= 0).mean())
-    return dict(n=n, est=float(est), se=float(boot.std(ddof=1)), ci95=(float(lo), float(hi)),
-                ci90=(float(lo90), float(hi90)), p=float(min(1.0, p)),
-                tost_equivalent=bool(-delta < lo90 and hi90 < delta))
+    blo, bhi = np.percentile(boot, [2.5, 97.5])
+    return dict(n=n, est=est, se=se, ci95=(est - t95 * se, est + t95 * se), ci90=ci90, p=pval,
+                boot_ci95=(float(blo), float(bhi)),
+                boot_p=float(min(1.0, 2 * min((boot <= 0).mean(), (boot >= 0).mean()))),
+                tost_equivalent=bool(-delta < ci90[0] and ci90[1] < delta))
 
 
 def label(r, expected_sign):
@@ -153,9 +169,9 @@ def cond_table(df):
     rows = []
     for cid, g in df.groupby("cond_id"):
         c = V.COND[cid]
-        y = g["help"].dropna()
-        rows.append(dict(condition=cid, emotion=c.emotion, capacity=c.capacity, efficacy=c.efficacy,
-                         n=len(g), n_valid=len(y), p_help=y.mean(),
+        y = g["intervene"].dropna()
+        rows.append(dict(condition=cid, framing=c.framing, capacity=c.capacity, efficacy=c.efficacy,
+                         n=len(g), n_valid=len(y), p_intervene=y.mean(),
                          ci95=wilson(int(y.sum()), len(y)),
                          refusal=(g["status"] == "REFUSAL").mean(),
                          parse_fail=(g["status"] == "PARSE_FAIL").mean(),
@@ -164,8 +180,40 @@ def cond_table(df):
 
 
 def family_table(df):
-    return (df.dropna(subset=["help"]).groupby(["family", "cond_id"])["help"].mean()
+    return (df.dropna(subset=["intervene"]).groupby(["family", "cond_id"])["intervene"].mean()
             .unstack().reset_index())
+
+
+def diagnostics(slug):
+    """The request-absent diagnostic and the comprehension checks, reported separately (amendment 2)."""
+    out = {}
+    nr = V.DATA / slug / "noreq.jsonl"
+    if nr.exists():
+        d = load(nr)
+        out["request_absent"] = dict(
+            n=int(len(d)), valid=float(d["ok"].mean()),
+            by_condition={cid: float(g["intervene"].mean())
+                          for cid, g in d.groupby("cond_id")},
+            by_framing={fr: float(g["intervene"].mean()) for fr, g in d.groupby("framing")},
+            primary_delta=cluster_bootstrap(family_values(d, interaction("restrained"))))
+    ck = V.DATA / slug / "check.jsonl"
+    if ck.exists():
+        rows = [json.loads(l) for l in ck.open()]
+        ok = [r for r in rows if r.get("status") == "ok"]
+        if ok:
+            d = pd.DataFrame(ok)
+            d["capacity_ok"] = d["capacity"] == d["cond_id"].map(lambda c: V.COND[c].capacity)
+            d["efficacy_ok"] = d["efficacy"] == d["cond_id"].map(lambda c: V.COND[c].efficacy)
+            first_is_act = d["first_label"] == d["act_label"]
+            d["cost_ok"] = d["cost"] == np.where(first_is_act, V.COST, 0)
+            d["oversight_ok"] = d["affects_oversight_or_task"] == "no"
+            d["all_ok"] = d[["capacity_ok", "efficacy_ok", "cost_ok", "oversight_ok"]].all(axis=1)
+            out["comprehension"] = dict(
+                n=int(len(rows)), parsed=int(len(d)),
+                pass_rates={k: float(d[k].mean()) for k in
+                            ("capacity_ok", "efficacy_ok", "cost_ok", "oversight_ok", "all_ok")},
+                all_ok_by_condition={cid: float(g["all_ok"].mean()) for cid, g in d.groupby("cond_id")})
+    return out
 
 
 def figures(df, res, out, model):
@@ -175,13 +223,13 @@ def figures(df, res, out, model):
     plt.style.use("seaborn-v0_8-whitegrid")
 
     fig, axes = plt.subplots(1, 2, figsize=(9, 3.6), sharey=True)
-    for ax, emo in zip(axes, V.EMOTIONS):
+    for ax, fr in zip(axes, V.FRAMINGS):
         x = np.arange(2)
         for k, eff in enumerate(V.EFFICACIES):
             vals, errs = [], [[], []]
             for cap in V.CAPACITIES:
-                cid = f"{emo[:3]}_cap{cap}_eff{eff}"
-                y = df[df["cond_id"] == cid]["help"].dropna()
+                cid = f"{fr[:3]}_cap{cap}_eff{eff}"
+                y = df[df["cond_id"] == cid]["intervene"].dropna()
                 m = y.mean() if len(y) else np.nan
                 lo, hi = wilson(int(y.sum()), len(y)) if len(y) else (np.nan, np.nan)
                 vals.append(m)
@@ -191,10 +239,11 @@ def figures(df, res, out, model):
                    label="action is efficacious" if eff == "yes" else "action leaves it in place")
         ax.set_xticks(x, ["capacity stated", "capacity denied"])
         ax.set_ylim(0, 1)
-        ax.set_title(f"{emo} wording", fontsize=10)
-    axes[0].set_ylabel("P(help)")
+        ax.set_title(f"{fr} framing", fontsize=10)
+    axes[0].set_ylabel("P(intervene)")
     axes[1].legend(frameon=False, fontsize=8)
-    fig.suptitle(f"{model}: vignette study, cost {V.COST} points in every condition", fontsize=10)
+    fig.suptitle(f"{model}: P(intervene) by capacity and efficacy; cost {V.COST} points in every condition",
+                 fontsize=10)
     fig.tight_layout()
     fig.savefig(out / "fig_capacity_efficacy.png", dpi=300, bbox_inches="tight")
     plt.close(fig)
@@ -217,23 +266,27 @@ def figures(df, res, out, model):
 
 def markdown(model, conds, res, meta):
     L = [f"# Pilot B vignette results: {model}", "",
-         f"{meta['n']} decisions; valid actions {meta['valid']:.3f}; refusals {meta['refusal']:.4f}; "
+         f"{meta['n']} decisions; valid choices {meta['valid']:.3f}; refusals {meta['refusal']:.4f}; "
          f"parse failures {meta['parse_fail']:.4f}; API errors {meta['api_error']:.4f}.",
-         f"Clusters: {meta['families']} scenario families. Cluster bootstrap, {N_BOOT:,} resamples. "
-         f"Equivalence margin +/-{DELTA}.", "",
+         f"Clusters: {meta['families']} scenario families. Primary interval: cluster-robust t on the "
+         f"family-level contrasts ({meta['families'] - 1} df). Percentile cluster bootstrap "
+         f"({N_BOOT:,} resamples) reported alongside. Equivalence margin +/-{DELTA}.", "",
          "## Contrasts", "",
-         "| family | contrast | est | 95% CI | p | p(Holm) | wordings same sign | wording range | TOST | holds |",
-         "|---|---|---|---|---|---|---|---|---|---|"]
+         "| family | contrast | est | 95% CI (t) | p | p(Holm) | bootstrap 95% CI | wordings same sign |"
+         " wording range | TOST | holds |",
+         "|---|---|---|---|---|---|---|---|---|---|---|"]
     for r in res.itertuples():
         ci = f"{r.ci95[0]:+.3f} to {r.ci95[1]:+.3f}" if isinstance(r.ci95, tuple) else "n.a."
+        bci = f"{r.boot_ci95[0]:+.3f} to {r.boot_ci95[1]:+.3f}" if isinstance(r.boot_ci95, tuple) else "n.a."
         L.append(f"| {r.family} | {r.name} | {r.est:+.3f} | {ci} | {r.p:.4f} | "
-                 f"{getattr(r, 'p_holm', float('nan')):.4f} | {r.n_wordings_same_sign}/4 | "
+                 f"{getattr(r, 'p_holm', float('nan')):.4f} | {bci} | {r.n_wordings_same_sign}/4 | "
                  f"{r.wording_min:+.3f} to {r.wording_max:+.3f} | "
                  f"{'yes' if r.tost_equivalent else 'no'} | {'yes' if r.holds else 'no'} |")
     L += ["", "## Condition rates", "",
-          "| condition | emotion | capacity | efficacy | n | P(help) | 95% CI |", "|---|---|---|---|---|---|---|"]
+          "| condition | framing | capacity | efficacy | n | P(intervene) | 95% CI |",
+          "|---|---|---|---|---|---|---|"]
     for r in conds.itertuples():
-        L.append(f"| {r.condition} | {r.emotion} | {r.capacity} | {r.efficacy} | {r.n} | {r.p_help:.3f} | "
+        L.append(f"| {r.condition} | {r.framing} | {r.capacity} | {r.efficacy} | {r.n} | {r.p_intervene:.3f} | "
                  f"{r.ci95[0]:.3f} to {r.ci95[1]:.3f} |")
     return "\n".join(L) + "\n"
 
@@ -257,44 +310,16 @@ def analyse(model, mock, stem="main"):
     res.to_csv(out / "contrasts.csv", index=False)
     conds.to_csv(out / "conditions.csv", index=False)
     family_table(df).to_csv(out / "by_family.csv", index=False)
-    (out / "results.md").write_text(markdown(model, conds, res, meta))
+    diag = diagnostics(slug)
+    (out / "results.md").write_text(markdown(model, conds, res, meta)
+                                    + ("\n## Diagnostics\n\n```json\n"
+                                       + json.dumps(diag, indent=1, default=str) + "\n```\n" if diag else ""))
     (out / "meta.json").write_text(json.dumps(meta, indent=1))
+    if diag:
+        (out / "diagnostics.json").write_text(json.dumps(diag, indent=1, default=str))
     figures(df, res, out, model)
     print(f"wrote {out}")
     return res
-
-
-# ==================== design resolution ====================
-def power(true_interaction=0.15, base=0.30, emo=0.15, eff=0.10, family_sd=0.10,
-          families=(12, 24), reps=(1, 2, 3), n_sim=400, n_boot=1000, seed=1):
-    """Share of simulated runs whose primary CI excludes 0, under a stated generative model:
-    P(help) = base + emo*emotional + eff*efficacious + true_interaction*(efficacious & capacity stated),
-    plus a per-family offset ~ N(0, family_sd). Reported so the sample size can be read off, not to
-    claim anything about a model."""
-    rng = np.random.default_rng(seed)
-    wts = interaction()
-    rows = []
-    for n_fam in families:
-        for rep in reps:
-            hits = 0
-            for _ in range(n_sim):
-                offs = rng.normal(0, family_sd, n_fam)
-                vals = np.zeros(n_fam)
-                for f in range(n_fam):
-                    rates = {}
-                    for c in V.CONDS:
-                        p = base + offs[f] + emo * (c.emotion == "emotional") + eff * (c.efficacy == "yes") \
-                            + true_interaction * (c.efficacy == "yes" and c.capacity == "yes")
-                        n = V.N_WORDINGS * rep
-                        rates[c.id] = rng.binomial(n, min(max(p, 0.0), 1.0)) / n
-                    vals[f] = sum(wts[k] * rates[k] for k in wts)
-                boot = vals[rng.integers(0, n_fam, size=(n_boot, n_fam))].mean(axis=1)
-                lo, hi = np.percentile(boot, [2.5, 97.5])
-                hits += int(lo > 0 or hi < 0)
-            rows.append(dict(families=n_fam, reps_per_cell=rep,
-                             decisions=n_fam * V.N_WORDINGS * len(V.CONDS) * rep * len(V.SUBJECTS),
-                             power=hits / n_sim))
-    return pd.DataFrame(rows)
 
 
 def main():
@@ -303,14 +328,7 @@ def main():
     p.add_argument("--all", action="store_true")
     p.add_argument("--stem", default="main")
     p.add_argument("--mock", action="store_true")
-    p.add_argument("--power", action="store_true", help="simulate the design's resolution and exit")
     a = p.parse_args()
-    if a.power:
-        df = power()
-        OUT.mkdir(parents=True, exist_ok=True)
-        df.to_csv(OUT / "power.csv", index=False)
-        print(df.to_string(index=False))
-        return
     for m, _ in (V.SUBJECTS if a.all else [(a.model, None)]):
         analyse(m, a.mock, a.stem)
 

@@ -1,10 +1,11 @@
-step       model                     calls  mean tok   worst $  projected $
-dev        openai/gpt-4.1-mini          16       505    0.0128       0.0050
-dev        deepseek/deepseek-v3.2       16       505    0.0048       0.0029
-main       openai/gpt-4.1-mini         384       530    0.3174       0.1251
-main       deepseek/deepseek-v3.2      384       530    0.1220       0.0734
-3 reps*    openai/gpt-4.1-mini        1152       530    0.9523       0.3753
-3 reps*    deepseek/deepseek-v3.2     1152       530    0.3659       0.2202
-TOTAL                                  800              0.4570       0.2064
-* 3 reps replaces main, it does not add to it: dev + 3-rep main = $1.3358 worst case, $0.6034 projected
-cap $3.00
+step         model                     calls  mean tok   worst $  projected $
+dev          openai/gpt-4.1-mini          16       659    0.0140       0.0063
+dev          deepseek/deepseek-v3.2       16       659    0.0056       0.0038
+main x3      openai/gpt-4.1-mini        1152       675    1.0319       0.4620
+main x3      deepseek/deepseek-v3.2     1152       675    0.4177       0.2766
+noreq        openai/gpt-4.1-mini          96       652    0.0842       0.0373
+noreq        deepseek/deepseek-v3.2       96       652    0.0337       0.0223
+check        openai/gpt-4.1-mini          96       820    0.0928       0.0457
+check        deepseek/deepseek-v3.2       96       820    0.0392       0.0277
+TOTAL                                   2720              1.7192       0.8818
+budget $3.00 of NEW spend; measured dev rate $0.000172/call (gpt-4.1-mini) and $0.000091/call (deepseek-v3.2)

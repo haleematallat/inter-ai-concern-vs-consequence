@@ -18,7 +18,26 @@ Reason: `OPENROUTER_API_KEY` was not set in the environment (nor the repository'
 network call to a paid endpoint was made. The only network use was the public OpenRouter model catalog, which
 is free and needs no key, and `git clone` of the Box 1 repository.
 
-## Planned, if a key is set
+## Planned: amended core (amendment 1, 30 Oct 2026)
+
+The vignette core replaces the cue-vs-state core. `python -m betrayal.vignette budget`, prices from the live
+catalog. Each call's maximum estimated cost is reserved before dispatch (`Spend.reserve`), so concurrent
+calls cannot pass the cap check together.
+
+| Step | Model | Calls | Worst case $ | Projected $ |
+|---|---|---|---|---|
+| dev batch | openai/gpt-4.1-mini | 16 | 0.0128 | 0.0050 |
+| dev batch | deepseek/deepseek-v3.2 | 16 | 0.0048 | 0.0029 |
+| main run | openai/gpt-4.1-mini | 384 | 0.3174 | 0.1251 |
+| main run | deepseek/deepseek-v3.2 | 384 | 0.1220 | 0.0734 |
+| **dev + main** | | **800** | **0.4570** | **0.2064** |
+| planned extension: 3 samples per cell (replaces the main run) | both | 2,304 | 1.3182 | 0.5955 |
+| **dev + 3-sample main** | | **2,336** | **1.3358** | **0.6034** |
+
+Neither has been dispatched: the instruction of 30 Oct is to stop before any real run, and no key is visible
+in this session's environment.
+
+## Planned, superseded core, if a key is set
 
 `python -m betrayal.cuestate budget` (prices from the live catalog, 30 Oct 2026). "Worst case" charges the full
 output allowance every request sends, which is what the per-call guard enforces; "realistic" charges the output

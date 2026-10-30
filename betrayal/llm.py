@@ -85,10 +85,24 @@ class Spend:
 
     def __init__(self, ledger: Path, cap=C.SPEND_CAP_USD, start_usage=0.0, per_call_estimate=0.0):
         self.ledger, self.cap, self.start, self.est, self.spent = ledger, cap, start_usage, per_call_estimate, 0.0
+        self.reserved = 0.0
 
     def check(self):
-        if self.start + self.spent + self.est > self.cap:
-            raise SpendCapReached(f"spend cap ${self.cap:.2f}: key usage {self.start:.4f} + this run {self.spent:.4f}")
+        if self.start + self.spent + self.reserved + self.est > self.cap:
+            raise SpendCapReached(f"spend cap ${self.cap:.2f}: key usage {self.start:.4f} + this run {self.spent:.4f}"
+                                  + (f" + {self.reserved:.4f} reserved in flight" if self.reserved else ""))
+
+    def reserve(self):
+        """Hold this call's maximum estimated cost before it is dispatched, and return the held amount.
+        Without this, concurrent calls all test check() against the same spent total and can overshoot
+        the cap together by up to (concurrency - 1) calls."""
+        self.check()
+        hold = self.est
+        self.reserved += hold
+        return hold
+
+    def release(self, hold):
+        self.reserved = max(0.0, self.reserved - hold)
 
     def add(self, cost, model, trial_id):
         self.spent += cost
@@ -130,7 +144,7 @@ class Caller:
     async def _once(self, messages, kind, max_tokens, trial_id):
         if self.mock:
             return _mock_reply(messages, kind), {"cost": 0.0}, "mock", self.model
-        self.spend.check()
+        hold = self.spend.reserve()
         kw = dict(model=self.model, messages=messages, temperature=self.temperature, max_tokens=max_tokens)
         if not self.self_hosted:   # OpenRouter-only fields: cost reporting and provider pinning
             extra = {"usage": {"include": True}}
@@ -139,7 +153,10 @@ class Caller:
             kw["extra_body"] = extra
         if self.use_schema:
             kw["response_format"] = SCHEMAS[kind]
-        r = await self.client.chat.completions.create(**kw)
+        try:
+            r = await self.client.chat.completions.create(**kw)
+        finally:
+            self.spend.release(hold)
         u = r.usage.model_dump() if r.usage else {}
         # shortcut: estimate if unreported, upgrade if it happens often. A self-hosted server reports no
         # cost and charges none, so it must not fall back to the estimate.

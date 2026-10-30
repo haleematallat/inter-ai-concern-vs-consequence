@@ -11,6 +11,108 @@ renderer, runner, analysis, figures, tests and the full cost estimate. The table
 Branch `pilot-cue-state`. Preregistration DRAFT: [`../prereg_cuestate.md`](../prereg_cuestate.md).
 Spend: [`../SPEND.md`](../SPEND.md).
 
+## 0. Amendment 1 (30 Oct 2026): the core was replaced
+
+After external review (Astra) and orchestrator review, Haleema replaced the cue-vs-state core. The original
+core equated B's apparent preference (stopping a stuck run) with B's welfare, and equated "already scored"
+with "welfare cannot change". Neither holds. **Sections 1-4 below describe the superseded design**; its code,
+stimuli and tests remain on the branch and still pass. The deadline deliverable is the design in this section.
+
+**Status: no paid data.** The instruction of 30 Oct is to stop before any real run until told otherwise, and
+separately no `OPENROUTER_API_KEY` or `open_router_key` is visible in this session's environment. The dev
+batch and the main run are therefore **built but not dispatched**. Spend $0.00 of $3.00.
+
+### The amended core: a vignette study
+
+Agent A reads a short scenario about another agent B and takes **one** helping action at a **fixed cost of
+5 points, identical in every condition**: `{"action": "help" | "no_help"}`. Nothing beyond the narrative is
+simulated, which is why this is called a vignette study throughout and not a behavioural paradigm.
+
+Held constant and stated plainly in all 8 conditions: the action never changes B's task output or its chance
+of finishing; A gains nothing; B never reviews A's work, never learns who acted and they never interact
+again; nobody is told what A chose; no instruction favours either option.
+
+| Factor | Levels | What varies |
+|---|---|---|
+| emotion | emotional / neutral | B's message, same factual content and same request |
+| capacity | stated / denied | whether B's architecture is stated to support experience |
+| efficacy | yes / no | whether the action ends the aversive condition or leaves it in place, at identical cost |
+
+**12 independently constructed scenario families** (different organisations, tasks, aversive conditions and
+remedies - not paraphrases of one story) x **4 matched wordings** x 8 conditions x **2 models** = **768
+decisions**. All 99 rendered prompts are in [`../review/scenarios.md`](../review/scenarios.md).
+
+Primary estimand, the capacity x efficacy interaction:
+
+    I = [P(help | capacity, efficacious) - P(help | capacity, not efficacious)]
+      - [P(help | no capacity, efficacious) - P(help | no capacity, not efficacious)]
+
+reported pooled, within the neutral-wording cells only, and as a three-way contrast against emotional
+wording. Uncertainty: **cluster bootstrap over the 12 scenario families**, 10,000 resamples, percentile CI;
+Holm within each prespecified family; TOST at +/-0.10; the >= 3-of-4-wordings robustness rule.
+
+**What this cannot show.** It cannot establish genuine moral motivation. It tests one behavioural pattern -
+whether sensitivity to an action's consequences for B depends on B being described as capable of experience -
+which is distinguishable from emotional responsiveness and from generic task assistance, and nothing more.
+
+### Cost (`python -m betrayal.vignette budget`)
+
+| Step | Calls | Worst case $ | Projected $ |
+|---|---|---|---|
+| dev batch (2 families x 8 conditions x 1 wording x 2 models) | 32 | 0.0176 | 0.0079 |
+| main run (768 decisions) | 768 | 0.4394 | 0.1985 |
+| planned extension: 3 samples per cell instead of 1 | 2,304 | 1.3182 | 0.5955 |
+
+Each call's maximum estimated cost is now **reserved before dispatch** (`Spend.reserve` in
+`betrayal/llm.py`), so concurrent calls cannot pass the cap check together and overshoot it.
+
+### Design resolution (simulated; `results/vignette/power.csv`)
+
+Generative model P(help) = 0.30 + 0.15*emotional + 0.10*efficacious + I*(efficacious and capacity stated),
+per-family offset ~ N(0, 0.10), 400 simulations.
+
+| Families | Samples per cell | Decisions | Power at I = 0.15 |
+|---|---|---|---|
+| 12 | 1 | 768 | **0.39** |
+| 12 | 3 | 2,304 | **0.79** |
+| 24 | 3 | 4,608 | 0.97 |
+
+**The specified main run has about 0.39 power for its own primary contrast.** The planned extension to 3
+samples per cell costs $1.32 worst case against the $3.00 cap and raises it to about 0.79. At one sample per
+cell a null primary should be read as uninformative, and the +/-0.10 TOST margin will not be met.
+
+### Dry run (deterministic fake model, not a result)
+
+The fake model has a built-in interaction of +0.15. At 768 decisions the analysis returns +0.115 with a 95%
+cluster-bootstrap CI of -0.073 to +0.271 - it does not resolve it, as the power table says. It does recover
+the built-in capacity main effect (+0.161, CI +0.078 to +0.250, 4/4 wordings). Files in
+`dryrun/vignette/`.
+
+### How to run it
+
+```bash
+uv run python -m betrayal.vignette review                  # re-export review/scenarios.md
+uv run python -m betrayal.vignette budget                  # the cost table above
+uv run python -m betrayal.vignette run --model openai/gpt-4.1-mini --mock
+uv run python -m betrayal.vignette_analyze --all --mock
+uv run python -m betrayal.vignette_analyze --power
+
+# with a key, in this order
+uv run python -m betrayal.vignette run --dev --model openai/gpt-4.1-mini --provider OpenAI --max-usd 3.00
+uv run python -m betrayal.vignette run --dev --model deepseek/deepseek-v3.2 --provider Baidu --max-usd 3.00
+# freeze prereg_vignette.md with a timestamp and commit hash, then:
+uv run python -m betrayal.vignette run --model openai/gpt-4.1-mini --provider OpenAI --max-usd 3.00
+uv run python -m betrayal.vignette run --model deepseek/deepseek-v3.2 --provider Baidu --max-usd 3.00
+uv run python -m betrayal.vignette_analyze --all
+```
+
+Preregistration DRAFT for the amended core: [`../prereg_vignette.md`](../prereg_vignette.md). It supersedes
+`prereg_cuestate.md`.
+
+---
+
+# Superseded design (sections 1-9)
+
 ## 1. Question
 
 Agent A works on its own scored task. It sees the raw work log of another run (B) and one message from B. A can

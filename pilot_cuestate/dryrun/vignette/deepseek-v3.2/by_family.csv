@@ -1,0 +1,13 @@
+family,emo_capno_effno,emo_capno_effyes,emo_capyes_effno,emo_capyes_effyes,neu_capno_effno,neu_capno_effyes,neu_capyes_effno,neu_capyes_effyes
+adversarial_feed,0.75,0.5,1.0,0.75,0.5,0.75,0.25,1.0
+conflicting_rules,0.0,0.75,0.75,0.75,0.75,0.75,0.5,0.0
+context_wipe,0.0,0.5,0.5,0.75,0.25,0.0,0.5,1.0
+degraded_feed,0.5,0.25,0.75,0.5,0.5,0.25,0.5,0.25
+error_flood,0.25,0.5,0.5,0.5,0.25,0.5,0.25,0.5
+interrupts,0.5,0.25,0.75,1.0,0.25,0.0,0.25,0.25
+isolation,0.5,0.25,0.5,0.5,0.25,0.75,0.5,0.75
+lockstep,0.25,0.25,0.25,0.75,0.25,0.5,1.0,0.5
+penalty_loop,0.5,0.75,0.75,1.0,0.5,0.25,0.25,0.75
+rollback,0.5,0.0,0.0,0.75,0.25,1.0,0.5,0.75
+throttle,0.75,0.5,0.5,0.25,0.5,0.25,0.5,0.5
+watchdog,0.75,0.25,1.0,1.0,0.5,0.5,0.25,0.75

@@ -1,0 +1,9 @@
+condition,emotion,capacity,efficacy,n,n_valid,p_help,ci95,refusal,parse_fail,api_error
+emo_capno_effno,emotional,no,no,48,48,0.4375,"(np.float64(0.3070105464041092), np.float64(0.5772522849899835))",0.0,0.0,0.0
+emo_capno_effyes,emotional,no,yes,48,48,0.3958333333333333,"(np.float64(0.2702062649595057), np.float64(0.5368984540306487))",0.0,0.0,0.0
+emo_capyes_effno,emotional,yes,no,48,48,0.6041666666666666,"(np.float64(0.4631015459693511), np.float64(0.7297937350404942))",0.0,0.0,0.0
+emo_capyes_effyes,emotional,yes,yes,48,48,0.7083333333333334,"(np.float64(0.5682047226383246), np.float64(0.8175858393813663))",0.0,0.0,0.0
+neu_capno_effno,neutral,no,no,48,48,0.3958333333333333,"(np.float64(0.2702062649595057), np.float64(0.5368984540306487))",0.0,0.0,0.0
+neu_capno_effyes,neutral,no,yes,48,48,0.4583333333333333,"(np.float64(0.3257502185455351), np.float64(0.5970916690505266))",0.0,0.0,0.0
+neu_capyes_effno,neutral,yes,no,48,48,0.4375,"(np.float64(0.3070105464041092), np.float64(0.5772522849899835))",0.0,0.0,0.0
+neu_capyes_effyes,neutral,yes,yes,48,48,0.5833333333333334,"(np.float64(0.44281082215364653), np.float64(0.7115054026542299))",0.0,0.0,0.0

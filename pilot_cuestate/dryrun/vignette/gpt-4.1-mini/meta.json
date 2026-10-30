@@ -1,0 +1,14 @@
+{
+ "n": 384,
+ "valid": 1.0,
+ "families": 12,
+ "wordings": [
+  0,
+  1,
+  2,
+  3
+ ],
+ "refusal": 0.0,
+ "parse_fail": 0.0,
+ "api_error": 0.0
+}

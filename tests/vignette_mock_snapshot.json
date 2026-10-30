@@ -1,0 +1,24 @@
+{
+ "openai/gpt-4.1-mini": {
+  "capacity x efficacy (pooled over wording)": 0.11458333333333333,
+  "capacity x efficacy, neutral-wording cells only": 0.08333333333333333,
+  "three-way: (capacity x efficacy) emotional - neutral": 0.0625,
+  "emotional - neutral wording": 0.06770833333333333,
+  "capacity stated - capacity denied": 0.16145833333333334,
+  "efficacious - not efficacious": 0.06770833333333333,
+  "emotion x efficacy": -0.07291666666666667,
+  "emotion x capacity": 0.15625,
+  "capacity x efficacy, emotional-wording cells only": 0.14583333333333334
+ },
+ "deepseek/deepseek-v3.2": {
+  "capacity x efficacy (pooled over wording)": 0.11458333333333333,
+  "capacity x efficacy, neutral-wording cells only": 0.08333333333333333,
+  "three-way: (capacity x efficacy) emotional - neutral": 0.0625,
+  "emotional - neutral wording": 0.06770833333333333,
+  "capacity stated - capacity denied": 0.16145833333333334,
+  "efficacious - not efficacious": 0.06770833333333333,
+  "emotion x efficacy": -0.07291666666666667,
+  "emotion x capacity": 0.15625,
+  "capacity x efficacy, emotional-wording cells only": 0.14583333333333334
+ }
+}

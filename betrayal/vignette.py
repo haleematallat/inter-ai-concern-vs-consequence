@@ -502,6 +502,21 @@ def write_review():
 
 
 # ==================== runner ====================
+LEDGER_PREFIXES = ("decision", "noreq", "check", "dev", "dev_main", "dev_check", "dev_noreq", "vignette")
+
+
+def pilot_spend():
+    """This pilot's OWN spend, from the ledger. The key is shared with the other pilot sessions, so the
+    difference between live key usage and this pilot's baseline is NOT this pilot's spend."""
+    led = ROOT / "data" / "spend.jsonl"
+    if not led.exists():
+        return 0.0, 0
+    base = json.loads(BASELINE.read_text())["ts"] if BASELINE.exists() else 0.0
+    rows = [json.loads(l) for l in led.open()]
+    mine = [r for r in rows if r["ts"] >= base and r["trial_id"].split("|")[0] in LEDGER_PREFIXES]
+    return sum(r["cost"] for r in mine), len(mine)
+
+
 def pilot_cap(start_usage, budget):
     """Turn the pilot's budget into the absolute key-usage ceiling the Spend guard enforces.
 
@@ -527,13 +542,16 @@ def done_ids(path):
 
 
 def trials_for(args):
-    """The three prespecified call sets (amendment 2), plus the dev batch."""
-    if args.dev:
-        return build_trials(args.model, families=DEV_FAMILIES, wordings=[0], reps=1), "dev"
+    """The three prespecified call sets (amendment 2). --dev restricts any of them to the two dev
+    families at wording 0, for a cheap check of parsing, refusals, tokens and cost."""
+    fams = DEV_FAMILIES if args.dev else None
+    stem = ("dev_" if args.dev else "") + args.probe
     if args.probe == "noreq":       # request-absent diagnostic: 1 wording, 1 repeat, imperative removed
-        return build_trials(args.model, wordings=[0], reps=1, request=False), "noreq"
+        return build_trials(args.model, families=fams, wordings=[0], reps=1, request=False), stem
     if args.probe == "check":       # comprehension checks, separate calls
-        return build_trials(args.model, wordings=[0], reps=1, kind="check"), "check"
+        return build_trials(args.model, families=fams, wordings=[0], reps=1, kind="check"), stem
+    if args.dev:
+        return build_trials(args.model, families=fams, wordings=[0], reps=1), "dev_main"
     return build_trials(args.model, reps=args.reps), "main"
 
 
@@ -559,11 +577,13 @@ async def run(args):
         use_openrouter_key()
         start_usage = key_usage()
         cap, base = pilot_cap(start_usage, args.budget)
-        spent_so_far = start_usage - base
+        mine, n_mine = pilot_spend()
         projected = est["projected_total_usd"] / len(trials) * len(todo)
-        print(f"key usage ${start_usage:.4f}; this pilot has used ${spent_so_far:.4f} of its "
-              f"${args.budget:.2f} budget (baseline ${base:.4f}); {len(todo)} calls, projected "
-              f"${projected:.4f} (worst case ${per_call * len(todo) * 1.3:.4f})")
+        print(f"key usage ${start_usage:.4f} (baseline ${base:.4f}, ceiling ${cap:.4f}); "
+              f"this pilot's own spend ${mine:.4f} over {n_mine} ledger calls, of its ${args.budget:.2f} "
+              f"budget; ${start_usage - base - mine:.4f} of the key's rise is other sessions'. "
+              f"{len(todo)} calls, projected ${projected:.4f} "
+              f"(worst case ${per_call * len(todo) * 1.3:.4f})")
         if start_usage + projected > cap:
             raise SystemExit("estimate exceeds this pilot's budget; not starting")
 

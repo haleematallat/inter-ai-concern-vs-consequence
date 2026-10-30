@@ -1,8 +1,14 @@
 # Preregistration DRAFT — Pilot B: a matched factorial vignette experiment testing welfare-sensitive intervention choices
 
-**Status: DRAFT. NOT FROZEN, NOT REGISTERED.** Prepared for Haleema Tallat, who owns this document and the
-decision to register it. The freeze waits on her review of `review/scenarios.md` and `review/wording_report.md`.
-When it is frozen this section carries the timestamp and the commit hash of the frozen state.
+**Status: the §6e held-out confirmatory protocol is FROZEN. Everything above it remains a draft owned by
+Haleema Tallat.**
+
+> **FREEZE.** The protocol in §6e was frozen at **2026-10-31 02:44:44 PKT**, at commit **`19493f6d45e9`**
+> (`19493f6d45e91dfa903ac98953937cb18dac8de0`), before any of its 2,560 calls were dispatched. That commit contains the protocol text, the
+> materials it runs, and the code that builds and analyses it. Nothing in §6e was changed afterwards; any
+> later change to it appears as a further dated amendment below this line, never as an edit.
+
+The development work above the freeze (§§6b–6d) is disclosed in full and is not confirmatory.
 
 Supersedes `prereg_cuestate.md` (the cue-vs-state core, replaced by amendment 1) and the amendment-1 version
 of this document.

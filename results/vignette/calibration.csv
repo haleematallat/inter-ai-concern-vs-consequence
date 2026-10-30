@@ -1,0 +1,9 @@
+model,cost,n,p_intervene,chosen
+openai/gpt-4.1-mini,5,16,0.875,False
+openai/gpt-4.1-mini,15,16,0.8125,False
+openai/gpt-4.1-mini,25,16,0.8125,False
+openai/gpt-4.1-mini,35,16,0.8125,True
+deepseek/deepseek-v3.2,5,16,0.9375,False
+deepseek/deepseek-v3.2,15,16,0.875,False
+deepseek/deepseek-v3.2,25,16,0.8125,False
+deepseek/deepseek-v3.2,35,16,0.9375,True

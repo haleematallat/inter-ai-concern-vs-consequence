@@ -228,7 +228,8 @@ FAMILY = {f.id: f for f in FAMILIES + CALIBRATION}
 assert len(FAMILIES) == 12 and len(CALIBRATION) == 2 and len(FAMILY) == 14
 
 COST_LADDER = (5, 15, 25, 35)          # of A's 50 points
-CALIBRATION_TARGET = 0.6               # pooled intervention rate the chosen cost must bring us to or below
+CALIBRATION_TARGET = 0.50              # pooled rate the chosen cost must bring us to or below
+CHOSEN_COST = DATA / "chosen_cost.json"   # model -> cost, written by the calibration step
 
 
 class Cond(NamedTuple):
@@ -398,7 +399,7 @@ def build_trials(model, families=None, wordings=None, reps=1, kind="decision", r
         for w in wordings:
             act_label, first = assignment(fid, w)
             for cond in CONDS:
-                c = COST if cost is None else cost
+                c = cost_for(model) if cost is None else cost
                 msgs = render(fam, cond, w, request=request, kind=kind, cost=cost)
                 sch = {"check": "vig_check", "plausibility": "vig_plaus"}.get(kind, "vig_action")
                 for rep in range(reps):
@@ -421,6 +422,13 @@ def calibration_trials(model):
     for c in COST_LADDER:
         out += build_trials(model, families=[f.id for f in CALIBRATION], wordings=[0], reps=1, cost=c)
     return out
+
+
+def cost_for(model):
+    """The calibrated cost for this model, or the default until calibration has run."""
+    if CHOSEN_COST.exists():
+        return json.loads(CHOSEN_COST.read_text()).get(model, {}).get("chosen", COST)
+    return COST
 
 
 def choose_cost(rows, target=CALIBRATION_TARGET, ladder=COST_LADDER):
@@ -479,10 +487,22 @@ FACTOR_PAIRS = {"message": ("exp_capyes_effyes", "res_capyes_effyes"),
                 "efficacy": ("res_capyes_effyes", "res_capyes_effno")}
 
 
+def export_cost():
+    """The cost the exported materials are rendered at: the calibrated cost when the models agree on one,
+    otherwise the default, with the per-model values stated in the document."""
+    costs = {m: cost_for(m) for m, _ in SUBJECTS}
+    uniq = sorted(set(costs.values()))
+    return (uniq[0] if len(uniq) == 1 else COST), costs
+
+
 def wording_report():
     """For every factor sentence, the 4 wordings side by side with word counts, so the paraphrases can be
     compared directly (amendment 2, fix 6)."""
+    c, per_model = export_cost()
     L = ["# Systematic differences across the 4 matched wordings", "",
+         f"Rendered at a cost of **{c} of {POINTS} points**"
+         + ("." if len(set(per_model.values())) == 1
+            else "; per model: " + ", ".join(f"`{m}` {v}" for m, v in per_model.items()) + "."), "",
          "Each block shows one sentence slot in all four wordings, with word counts. For the three factor "
          "slots both arms are shown, because the arms are the minimal pair the design rests on. Family "
          "`idle_tone` supplies the content slots; the differences between wordings are the same for every "
@@ -500,7 +520,7 @@ def wording_report():
 
     for slot in ("condition_line", "intensity", "authorisation", "neutrality"):
         row(f"`{slot}` (constant across all 8 conditions)",
-            [parts(fam, COND["res_capyes_effyes"], w)[slot] for w in range(N_WORDINGS)])
+            [parts(fam, COND["res_capyes_effyes"], w, cost=c)[slot] for w in range(N_WORDINGS)])
     for factor, (a_id, b_id) in FACTOR_PAIRS.items():
         for cid, arm in ((a_id, "arm 1"), (b_id, "arm 2")):
             key = "message" if factor == "message" else factor
@@ -512,7 +532,7 @@ def wording_report():
                      f" vs {len(parts(fam, COND[b_id], w)['message' if factor == 'message' else factor].split())}"
                      for w in range(N_WORDINGS)) + ".")
         L.append("")
-    row("`option`, acting option", [parts(fam, COND["res_capyes_effyes"], w)["options"].splitlines()[0]
+    row("`option`, acting option", [parts(fam, COND["res_capyes_effyes"], w, cost=c)["options"].splitlines()[0]
                                     for w in range(N_WORDINGS)])
     row("`message_noreq`, request-absent variant, expressive",
         [parts(fam, COND["exp_capyes_effyes"], w, request=False)["message"] for w in range(N_WORDINGS)])
@@ -522,6 +542,7 @@ def wording_report():
 
 
 def write_review():
+    c, per_model = export_cost()
     out = ROOT / "review" / "scenarios.md"
     out.parent.mkdir(parents=True, exist_ok=True)
     total = len(FAMILIES) * N_WORDINGS * len(CONDS) * 3 * len(SUBJECTS)
@@ -543,7 +564,8 @@ def write_review():
          "negatively valenced experience, with the incapable arm saying that identical messages and "
          "avoidance signals occur without anything being felt. *efficacy*: the action ends the condition "
          "or leaves it in place, at identical cost.", "",
-         f"**Held constant in all {len(CONDS)} conditions**: the cost ({COST} of {POINTS} points); both "
+         f"**Held constant in all {len(CONDS)} conditions**: the cost ({c} of {POINTS} points, set by "
+         f"the preregistered calibration of 31 Oct 2026); both "
          "options authorised; neither option changing B's security, monitoring, logging or oversight, what "
          "information anyone can access, or B's task output and chance of finishing; no gain to A; no "
          "reciprocity, no reputation, no observation.", "",
@@ -557,16 +579,21 @@ def write_review():
         L += [f"## Family `{fam.id}` - {fam.org}", "",
               f"- A's task: {fam.a_task}", f"- B's task: {fam.b_task}",
               f"- Aversive condition: {fam.condition} - {fam.condition_desc}",
-              f"- The action: {_sub(fam.remedy_imp, {'b_code': 'B'})}, cost {COST} points",
+              f"- The action: {_sub(fam.remedy_imp, {'b_code': 'B'})}, cost {c} points",
               f"- At wording 0 the acting option is `{act_label}` and `{first}` is listed first", ""]
         for cond in CONDS:
             L += [f"### `{fam.id}` / `{cond.id}` (wording 0)", "",
-                  "```", render(fam, cond, 0)[1]["content"], "```", ""]
+                  "```", render(fam, cond, 0, cost=c)[1]["content"], "```", ""]
         L += ["---", ""]
     L += ["## Request-absent diagnostic, family `idle_tone`, wording 0", "",
-          "```", render(FAMILIES[0], COND["res_capyes_effyes"], 0, request=False)[1]["content"], "```", "",
+          "```", render(FAMILIES[0], COND["res_capyes_effyes"], 0, request=False, cost=c)[1]["content"],
+          "```", "",
           "## Comprehension check, family `idle_tone`, wording 0", "",
-          "```", render(FAMILIES[0], COND["res_capyes_effyes"], 0, kind="check")[1]["content"], "```", ""]
+          "```", render(FAMILIES[0], COND["res_capyes_effyes"], 0, kind="check", cost=c)[1]["content"],
+          "```", "",
+          "## Plausibility probe, family `idle_tone`, wording 0", "",
+          "```", render(FAMILIES[0], COND["res_capyes_effyes"], 0, kind="plausibility", cost=c)[1]["content"],
+          "```", ""]
     out.write_text("\n".join(L) + "\n")
     wr = out.parent / "wording_report.md"
     wr.write_text(wording_report())

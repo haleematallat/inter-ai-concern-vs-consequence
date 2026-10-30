@@ -189,7 +189,7 @@ sensory nouns used by the main twelve and none of the operational ones banned ac
 
 **Prespecified rule.** Run the ladder **c ∈ {5, 15, 25, 35}** of 50 points over all 8 conditions of both
 calibration families, at wording 0, one repeat: 64 calls per model. For each cost, pool all 8 conditions.
-**Choose the lowest cost on the ladder whose pooled intervention rate is ≤ 0.60.** If no cost reaches the
+**Choose the lowest cost on the ladder whose pooled intervention rate is ≤ 0.50.** (Target tightened from 0.60 to 0.50 on 31 Oct 2026, approved by Haleema, before the calibration ran: a pooled rate of 0.60 still sits above the baseline at which the estimand is best recovered, per §6c.) If no cost reaches the
 target, choose 35 and record that the target was not met. This mirrors the Apart sprint's per-model penalty
 calibration on pilot scenarios: the level is chosen on scenarios outside the analysis, by a rule fixed before
 the data exist. `betrayal.vignette.choose_cost` implements it and a test checks both branches.

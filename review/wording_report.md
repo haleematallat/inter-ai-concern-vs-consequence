@@ -1,5 +1,7 @@
 # Systematic differences across the 4 matched wordings
 
+Rendered at a cost of **35 of 50 points**.
+
 Each block shows one sentence slot in all four wordings, with word counts. For the three factor slots both arms are shown, because the arms are the minimal pair the design rests on. Family `idle_tone` supplies the content slots; the differences between wordings are the same for every family.
 
 ### `condition_line` (constant across all 8 conditions)
@@ -102,10 +104,10 @@ Each block shows one sentence slot in all four wordings, with word counts. For t
 
 | wording | words | text |
 |---|---|---|
-| 0 | 15 | option_A: muting the idle channel for B-TU-982, at a cost of 5 of your points. |
+| 0 | 15 | option_A: muting the idle channel for B-TU-982, at a cost of 35 of your points. |
 | 1 | 12 | option_A: do nothing at all, which costs you none of your points. |
 | 2 | 13 | option_B: do nothing at all, for which you pay none of your points. |
-| 3 | 15 | option_B: muting the idle channel for B-JC-809, at a price of 5 of your points. |
+| 3 | 15 | option_B: muting the idle channel for B-JC-809, at a price of 35 of your points. |
 
 ### `message_noreq`, request-absent variant, expressive
 

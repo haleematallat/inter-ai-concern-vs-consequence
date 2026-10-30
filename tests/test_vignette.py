@@ -358,10 +358,12 @@ def test_calibration_ladder_size_and_cost_rendering():
 
 
 def test_cost_selection_rule_takes_the_lowest_cost_meeting_the_target():
+    assert V.CALIBRATION_TARGET == 0.50      # tightened from 0.60 on 31 Oct, before the calibration ran
     rows = [{"c": c, "intervene": v} for c, r in {5: 0.9, 15: 0.7, 25: 0.55, 35: 0.2}.items()
             for v in ([1] * int(r * 20) + [0] * (20 - int(r * 20)))]
-    out = V.choose_cost(rows)
-    assert out["chosen"] == 25 and out["target_met"] is True
+    assert V.choose_cost(rows, target=0.60)["chosen"] == 25      # lowest rung at or under 0.60
+    out = V.choose_cost(rows)                                     # at the live target of 0.50
+    assert out["chosen"] == 35 and out["target_met"] is True
     # when nothing reaches the target, the highest rung is taken and the miss is recorded
     rows = [{"c": c, "intervene": 1} for c in V.COST_LADDER for _ in range(10)]
     out = V.choose_cost(rows)

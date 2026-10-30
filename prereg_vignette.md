@@ -255,6 +255,64 @@ What it found:
 This supersedes the hypothesis in §4 as the live expectation, and it is development data that must be
 disclosed with any later confirmatory result: these 4 families at wording 0 have now been looked at.
 
+## 6e. Held-out confirmatory follow-up (31 Oct 2026) — THE PROTOCOL THAT IS RUN
+
+**This is a held-out confirmatory follow-up, not an independent replication.** It uses the same materials,
+the same two models and the same author as the development work; what is held out is the data, not the
+design. Approved by Haleema on her external review; recorded here, timestamped and tied to a commit hash
+below, and run without a further approval round.
+
+**Research question.** Does attributed capacity for negative experience increase intervention even when the
+intervention is ineffective?
+
+**Primary hypothesis.** The capacity x efficacy interaction is **negative**, as in development. This
+reverses the direction predicted in §4, which was written before any model outcome existed; §4 is kept
+above as the original hypothesis and is superseded here.
+
+**Primary contrast.** Restrained framing, request-present cells only. On the probability scale,
+
+    Δ = [p(C+,E+) − p(C+,E−)] − [p(C−,E+) − p(C−,E−)]
+
+averaged across the two costs, reported **separately for each model**, as family-level contrasts over the
+10 held-out families with family-clustered uncertainty: the cluster-robust t (9 df) as the primary
+interval, the percentile cluster bootstrap alongside. Calls are never treated as independent scenarios.
+
+**Holdout.** The 10 families whose model outcomes have never been run: the 12 main families minus
+`idle_tone` and `colour_wash`, which were used in the dev batch and the cost-response check. The two
+calibration-only families were never among the 12. Reviewing the wording of the 10 does not break the
+holdout; only model outcomes would.
+
+**Costs.** Fixed at **5 and 45** of 50 points. No further calibration.
+
+**Design.** 10 families x 4 wordings x 8 conditions x 2 costs x 2 request conditions x 2 models x 1
+response = **2,560 calls**. Measured cost for exactly this design, from the amendment-2 runs on the same
+prompt shape ($0.000215 per call on gpt-4.1-mini, $0.000088 on deepseek-v3.2): **$0.389, or $0.505 with 30%
+headroom**, confirmed before dispatch.
+
+**Request diagnostic (secondary).** Request-present versus request-absent, with all other information
+preserved including the distress framing: only the imperative is removed. Readings prespecified here:
+
+- absence reduces ineffective intervention → supports a contribution from direct request-following;
+- the pattern persists without the request → requests are not necessary for it;
+- the interaction does not generalise to the held-out families → the development finding is reported as
+  scenario-dependent.
+
+**Equivalence.** No prediction of non-significance is preregistered. Effect sizes and intervals are
+reported for everything. Any claim that behaviour is insensitive to efficacy or to cost requires the
+prespecified bound: **TOST at ±0.10, secondary, and equivalence is claimed only if the 90% interval fits
+inside it.**
+
+**Reporting.** Cell probabilities, family-level contrasts and clustered intervals, per model.
+
+**Disclosure.** Published with any result: the original hypothesis (§4), all development results including
+the four families already looked at (`idle_tone`, `colour_wash`, `stalled_handshake`,
+`looping_acknowledgement`; §6b, §6d and `results/vignette/`), the reason for this amendment, and this
+timestamped protocol.
+
+**The power analysis in §5 does not apply to this protocol.** It was computed for a different design, a
+different sign and a baseline of 0.15–0.50, before the saturation seen in development. No power figure is
+claimed here; the intervals are reported as they come out.
+
 ## 7. Procedure
 
 1. Build families, wordings, tests, dry run. *(done)*

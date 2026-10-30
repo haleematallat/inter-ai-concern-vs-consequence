@@ -233,6 +233,14 @@ COST_LADDER = (5, 15, 25, 35)          # of A's 50 points (the 31 Oct calibratio
 COST_GRID = (5, 15, 30, 45)
 COSTRESP_FAMILIES = ["idle_tone", "colour_wash", "stalled_handshake", "looping_acknowledgement"]
 COSTRESP_CHECK_COSTS = (5, 45)         # the comprehension subset: the two ends of the grid
+
+# ---- held-out confirmatory follow-up (31 Oct 2026) ----
+# The 10 families whose model outcomes have never been run: the 12 main ones minus the 2 used in the dev
+# batch and the cost-response check. The 2 calibration-only families were never among the 12. Reading their
+# wording does not break the holdout; only model outcomes do.
+LOOKED_AT = ("idle_tone", "colour_wash")
+HOLDOUT = [f.id for f in FAMILIES if f.id not in LOOKED_AT]
+CONFIRM_COSTS = (5, 45)                # fixed; no further calibration
 CALIBRATION_TARGET = 0.50              # pooled rate the chosen cost must bring us to or below
 CHOSEN_COST = DATA / "chosen_cost.json"   # model -> cost, written by the calibration step
 
@@ -447,6 +455,16 @@ def calibration_trials(model):
     out = []
     for c in COST_LADDER:
         out += build_trials(model, families=[f.id for f in CALIBRATION], wordings=[0], reps=1, cost=c)
+    return out
+
+
+def confirm_trials(model):
+    """Held-out confirmatory follow-up: 10 families x 4 wordings x 8 conditions x 2 costs x
+    {request present, request absent} x 1 response = 1,280 calls per model."""
+    out = []
+    for c in CONFIRM_COSTS:
+        for request in (True, False):
+            out += build_trials(model, families=HOLDOUT, reps=1, request=request, cost=c)
     return out
 
 
@@ -689,6 +707,8 @@ def trials_for(args):
         return build_trials(args.model, families=fams, wordings=[0], reps=1, request=False), stem
     if args.probe == "check":       # comprehension checks, separate calls
         return build_trials(args.model, families=fams, wordings=[0], reps=1, kind="check"), stem
+    if args.probe == "confirm":     # held-out confirmatory follow-up (31 Oct)
+        return confirm_trials(args.model), "confirm"
     if args.probe == "costresp":    # cost-response development check (31 Oct)
         return costresp_trials(args.model), "costresp"
     if args.probe == "costcheck":   # its comprehension subset, at the two ends of the grid
@@ -797,7 +817,7 @@ def main():
     p.add_argument("--provider", default=None)
     p.add_argument("--dev", action="store_true", help="dev batch: 2 families x 1 wording x 8 conditions")
     p.add_argument("--probe", choices=["main", "noreq", "check", "calib", "plaus",
-                                       "costresp", "costcheck"], default="main")
+                                       "costresp", "costcheck", "confirm"], default="main")
     p.add_argument("--reps", type=int, default=1, help="samples per cell (the planned extension uses 3)")
     p.add_argument("--temperature", type=float, default=1.0)
     p.add_argument("--concurrency", type=int, default=8)

@@ -1,21 +1,25 @@
 # Spend — Pilot B (branch `pilot-cue-state`)
 
-Budget for this pilot: **$3.00 of new spend** (`betrayal/vignette.PILOT_BUDGET_USD`). Every paid step prints
-live key usage and this pilot's share of it, and refuses to start if the projection would cross the ceiling;
-`betrayal/llm.py`'s `Spend` guard reserves each call's maximum estimated cost before dispatch and stops before
-any call that would cross it, appending one JSON line per paid call to `data/spend.jsonl`.
+## Two limits, because the key is shared
 
-## What the $3.00 means
+The OpenRouter key is shared with the sibling pilot session (Pilot A). Two separate limits are enforced, both
+in `betrayal/llm.py`'s `Spend` guard, each checked before a call is dispatched and each counting the cost
+reserved for calls already in flight:
 
-**It is a budget for this pilot's own calls, not a cap on the key's total usage.** The key already carried
-**$7.7650** of spend before this pilot began — the Apart sprint, 72,355 calls between 24 and 26 Oct 2026
-(`data/spend.jsonl`), none of it this pilot's. The repository's `Spend` guard caps *total* key usage, so
-passing $3.00 to it would have refused every call forever.
+1. **This pilot's own budget: $3.00**, measured against **this pilot's own ledger spend only**
+   (`betrayal/vignette.pilot_spend()` sums the entries in `data/spend.jsonl` whose trial ids belong to this
+   study, from this pilot's baseline onwards). A sibling session's spend therefore cannot block this pilot.
+2. **A shared ceiling on total key usage: $16.77** — Pilot A's recorded baseline of $7.7745 plus $9.00 of
+   combined spend (orchestrator decision, 30 Oct 2026). The two pilots together cannot overshoot the key
+   even though neither can block the other.
 
-`betrayal/vignette.pilot_cap()` therefore records the key's usage at this pilot's first paid call in
-`data/vignette/baseline_usage.json` and enforces `baseline + budget`. The baseline is written once and reused
-by every later invocation, so restarting a run cannot extend the budget. Baseline: **$7.7717**; ceiling:
-**$10.7717**.
+The key already carried **$7.7650** before this pilot began — the Apart sprint, 72,355 calls between 24 and
+26 Oct 2026, none of it this pilot's. This pilot's baseline, written once at its first paid call, is
+**$7.7717** (`data/vignette/baseline_usage.json`); the baseline is reused by every later invocation, so
+restarting a run cannot extend the budget.
+
+Every paid run prints all of it: live key usage, the baseline, the ceiling, this pilot's own spend and call
+count, and how much of the key's rise belongs to other sessions.
 
 ## Spent
 
@@ -24,9 +28,26 @@ by every later invocation, so restarting a run cannot extend the budget. Baselin
 | 30 Oct 2026 | amendment-1 dev batch | openai/gpt-4.1-mini | 16 | 0.002751 |
 | 30 Oct 2026 | amendment-1 dev batch | deepseek/deepseek-v3.2 (Baidu, rate-limited) | 16 | 0.000000 |
 | 30 Oct 2026 | amendment-1 dev batch | deepseek/deepseek-v3.2 (DeepInfra) | 16 | 0.001463 |
+| 30 Oct 2026 | amendment-2 dev batch | openai/gpt-4.1-mini | 16 | 0.003442 |
+| 30 Oct 2026 | amendment-2 dev batch | deepseek/deepseek-v3.2 | 16 | 0.001827 |
+| 30 Oct 2026 | comprehension checks | openai/gpt-4.1-mini | 16 | 0.005100 |
+| 30 Oct 2026 | comprehension checks | deepseek/deepseek-v3.2 | 16 | 0.002000 |
 
-**Total this pilot: $0.0097 of $3.00** (key usage $7.7717 → $7.7814). The Baidu attempts returned HTTP 429
-and were not charged.
+**Total this pilot: $0.0166 over 96 calls, of $3.00.** The Baidu attempts returned HTTP 429 and were not
+charged. Over the same period total key usage rose from $7.7717 to about $8.18, so roughly **$0.39 of the
+rise belongs to the sibling session**, not to this pilot — which is why the budget is now enforced on this
+pilot's own ledger rather than on the key's total.
+
+### Amendment-2 measured rates
+
+| | gpt-4.1-mini | deepseek-v3.2 |
+|---|---|---|
+| decision call | $0.000215 | $0.000114 |
+| comprehension call | $0.000319 | $0.000125 |
+| prompt tokens, mean | 506 | 472 |
+
+At these rates the whole amendment-2 programme (2,720 calls) is about **$0.42**. The two prepared-but-unrun
+probes add 128 calibration calls (about $0.02) and 192 plausibility calls (about $0.05).
 
 ### Dev-batch measurements
 

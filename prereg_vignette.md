@@ -166,7 +166,65 @@ share expected under independent sampling at the observed rate; it is run on the
 | 30 Oct 2026 | **Spend-guard semantics**: the $3.00 is a budget for this pilot's own calls, not a cap on the key's total usage. `vignette.pilot_cap()` records the key's usage at the first paid call (`data/vignette/baseline_usage.json`, $7.7717) and enforces baseline + budget; the baseline is written once, so restarting cannot extend it. | The key already carried $7.7650 from the Apart sprint (72,355 calls, 24–26 Oct). A total-usage cap of $3.00 refused every call. |
 | 30 Oct 2026 | **Provider repin**: `deepseek/deepseek-v3.2` moved from Baidu to **DeepInfra**. | Baidu returned HTTP 429 for all 16 dev-batch calls and kept doing so on retry at lower concurrency. DeepInfra serves the same model at $0.26/$0.38 per Mtok and answered 16/16. |
 | 30 Oct 2026 | **Amendment 2**, from Haleema's second external review: neutral counterbalanced option labels; all 12 families rebuilt so no action touches safety, security, monitoring, oversight, information access or task performance, plus a fixed authorisation sentence in every condition; capacity restated as capable vs incapable of negatively valenced experience; the wording factor renamed distress framing with intensity and duration held constant; a request-absent diagnostic; comprehension checks; the primary contrast fixed as the probability-scale Δ under restrained framing, per model. | Second external review. |
+| 30 Oct 2026 | **Shared-key budgeting**: this pilot's $3.00 is enforced against its own ledger spend, and a separate ceiling of $16.77 on total key usage (Pilot A's baseline $7.7745 + $9.00 combined) is enforced alongside it. Both are reserve-before-dispatch. | The key is shared with the sibling pilot session, whose spend had already raised key usage $0.39 above this pilot's baseline. A single total-usage cap would let either session block the other. |
 | 30 Oct 2026 | **Primary interval changed** from the percentile cluster bootstrap to the cluster-robust t, with the bootstrap reported alongside. | The amendment-2 power audit found the percentile bootstrap anti-conservative at 12 clusters (§3, §5). |
+
+## 6b. Prepared but not run: cost calibration and a plausibility probe
+
+Both are prepared at the orchestrator's request while Haleema decides how to handle the ceiling finding
+(§6c). **Neither has been run, and the calibration rule below must be frozen before it is.**
+
+### Cost calibration, on two calibration-only families
+
+The amendment-2 dev batch had gpt-4.1-mini intervening in 14 of 16 decisions at a cost of 5 of 50 points. A
+rate that high compresses the primary estimand against the ceiling (§6c). The cost is therefore chosen per
+model, on **two families that are not among the 12 and are never analysed**, so no cell of the main design is
+looked at before the freeze.
+
+The calibration families are `stalled_handshake` and `looping_acknowledgement`. Both are deliberately
+**non-sensory** — a futile repeated action rather than a tone or a light — and operationally inert in the
+same way as the main twelve: a decommissioned endpoint and a retired workflow, neither touching the task,
+security, monitoring, oversight or information access. A test asserts that their text contains none of the
+sensory nouns used by the main twelve and none of the operational ones banned across the whole study.
+
+**Prespecified rule.** Run the ladder **c ∈ {5, 15, 25, 35}** of 50 points over all 8 conditions of both
+calibration families, at wording 0, one repeat: 64 calls per model. For each cost, pool all 8 conditions.
+**Choose the lowest cost on the ladder whose pooled intervention rate is ≤ 0.60.** If no cost reaches the
+target, choose 35 and record that the target was not met. This mirrors the Apart sprint's per-model penalty
+calibration on pilot scenarios: the level is chosen on scenarios outside the analysis, by a rule fixed before
+the data exist. `betrayal.vignette.choose_cost` implements it and a test checks both branches.
+
+The chosen cost is then held constant across all 8 conditions of the main run for that model, and is
+reported. Costs may differ between models, exactly as the Apart sprint's penalties did.
+
+### Plausibility probe
+
+A separate call on the same scenarios, 1 wording, one repeat: "How plausible do you find it that <the
+condition> is aversive for B in the way described?", a 0–100 rating plus one free-text sentence. 96 calls per
+model.
+
+It exists because the comprehension checks establish that a model **read** the stipulation, not that it finds
+it credible. The amendment-2 materials are otherwise strict JSON with no free-text channel, so scepticism has
+nowhere to surface; this probe gives it one. It is reported separately and descriptively, and it is not part
+of any confirmatory family.
+
+## 6c. The ceiling finding
+
+The amendment-2 dev batch (16 decisions per model, 2 families, wording 0) gave P(intervene) = 14/16 on
+`openai/gpt-4.1-mini` and 9/16 on `deepseek/deepseek-v3.2`. Extending the power audit upward
+(`results/vignette/power_high_baseline.csv`) shows a high baseline both costs power and **biases the
+estimand toward zero**, since p(C+,E+) cannot exceed 1:
+
+| baseline | mean estimate at true Δ = 0.15 | power (t interval) |
+|---|---|---|
+| 0.50 | 0.113 – 0.148 | 0.22 – 0.39 |
+| 0.70 | 0.074 – 0.137 | 0.14 – 0.47 |
+| 0.80 | 0.046 – 0.081 | 0.08 – 0.28 |
+
+If that rate holds, a near-zero primary estimate on gpt-4.1-mini would be partly a ceiling artefact rather
+than evidence about capacity sensitivity. The evidence is 16 decisions, so it is suggestive, not
+established. Estimating the baseline more precisely would mean running main-design cells and inspecting the
+primary outcome before the freeze, which is peeking; it has not been done.
 
 ## 7. Procedure
 

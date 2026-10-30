@@ -81,15 +81,29 @@ class SpendCapReached(RuntimeError):
 
 
 class Spend:
-    """Stops before a call would push total key usage past the cap. Ledger: one JSON line per paid call."""
+    """Stops before a call would cross either of two limits. Ledger: one JSON line per paid call.
 
-    def __init__(self, ledger: Path, cap=C.SPEND_CAP_USD, start_usage=0.0, per_call_estimate=0.0):
+    `cap` is an absolute ceiling on TOTAL key usage, which is what protects a key shared between studies.
+    `own_cap` is this study's own budget, measured against its own spend only (`own_spent_before` is what
+    it had already spent in earlier invocations, read from the ledger). A study whose key is shared needs
+    both: the ceiling alone would let a sibling's spend block it, and the own budget alone would not stop
+    the two of them overshooting the key together."""
+
+    def __init__(self, ledger: Path, cap=C.SPEND_CAP_USD, start_usage=0.0, per_call_estimate=0.0,
+                 own_cap=None, own_spent_before=0.0):
         self.ledger, self.cap, self.start, self.est, self.spent = ledger, cap, start_usage, per_call_estimate, 0.0
         self.reserved = 0.0
+        self.own_cap, self.own_before = own_cap, own_spent_before
 
     def check(self):
-        if self.start + self.spent + self.reserved + self.est > self.cap:
-            raise SpendCapReached(f"spend cap ${self.cap:.2f}: key usage {self.start:.4f} + this run {self.spent:.4f}"
+        pending = self.spent + self.reserved + self.est
+        if self.own_cap is not None and self.own_before + pending > self.own_cap:
+            raise SpendCapReached(
+                f"own budget ${self.own_cap:.2f}: this study has spent {self.own_before:.4f} before this run "
+                f"+ {self.spent:.4f} in it"
+                + (f" + {self.reserved:.4f} reserved in flight" if self.reserved else ""))
+        if self.start + pending > self.cap:
+            raise SpendCapReached(f"key ceiling ${self.cap:.2f}: key usage {self.start:.4f} + this run {self.spent:.4f}"
                                   + (f" + {self.reserved:.4f} reserved in flight" if self.reserved else ""))
 
     def reserve(self):

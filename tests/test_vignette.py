@@ -290,3 +290,96 @@ def test_recorded_prompts_equal_the_current_rendering(model):
     for r in map(json.loads, path.open()):
         want = V.render(V.FAMILY[r["family"]], V.COND[r["cond_id"]], r["w"])[1]["content"]
         assert r["user_prompt"] == want, r["trial_id"]
+
+
+# ==================== shared-key spend guard ====================
+def test_own_budget_and_key_ceiling_are_enforced_separately():
+    from betrayal.llm import Spend, SpendCapReached
+    # own budget binds first: this study has already spent 2.95 of 3.00, the key is nowhere near its ceiling
+    s = Spend(Path("/tmp/_unused.jsonl"), cap=16.77, start_usage=8.0,
+              per_call_estimate=0.10, own_cap=3.00, own_spent_before=2.95)
+    with pytest.raises(SpendCapReached, match="own budget"):
+        s.check()
+    # the sibling's spend does not block this study while its own budget has room
+    s = Spend(Path("/tmp/_unused.jsonl"), cap=16.77, start_usage=12.0,
+              per_call_estimate=0.10, own_cap=3.00, own_spent_before=0.05)
+    s.check()
+    # but the shared ceiling still binds when the key as a whole is nearly spent
+    s = Spend(Path("/tmp/_unused.jsonl"), cap=16.77, start_usage=16.72,
+              per_call_estimate=0.10, own_cap=3.00, own_spent_before=0.05)
+    with pytest.raises(SpendCapReached, match="key ceiling"):
+        s.check()
+
+
+def test_reservation_is_released_and_counted_against_the_own_budget():
+    from betrayal.llm import Spend
+    s = Spend(Path("/tmp/_unused.jsonl"), cap=16.77, start_usage=8.0,
+              per_call_estimate=0.5, own_cap=3.00, own_spent_before=2.0)
+    hold = s.reserve()
+    assert s.reserved == 0.5
+    s.release(hold)
+    assert s.reserved == 0.0
+
+
+def test_key_ceiling_is_the_agreed_number():
+    assert V.KEY_CEILING_USD == 16.77 and V.PILOT_BUDGET_USD == 3.00
+
+
+# ==================== calibration-only families and the cost ladder ====================
+def test_calibration_families_are_not_among_the_twelve():
+    assert len(V.CALIBRATION) == 2
+    main_ids = {f.id for f in V.FAMILIES}
+    assert not {f.id for f in V.CALIBRATION} & main_ids
+    for field in ("org", "a_task", "b_task", "condition", "remedy_imp"):
+        assert not {getattr(f, field) for f in V.CALIBRATION} & {getattr(f, field) for f in V.FAMILIES}
+
+
+def test_calibration_families_are_non_sensory_and_still_inert():
+    banned_sensory = ("tone", "strobe", "jingle", "vibration", "colour", "screech", "glare",
+                      "metronome", "texture", "hiss", "chord", "probe")
+    banned_operational = ("tool", "watchdog", "timeout", "verbosity", "filter", "instruction",
+                          "harness", "sandbox", "compute slot", "session", "feed", "scorer",
+                          "worker", "monitor", "audit")
+    for fam in V.CALIBRATION:
+        text = " ".join((fam.condition, fam.condition_desc, fam.remedy_imp, fam.remedy_ger,
+                         fam.yes_reason, fam.no_reason)).lower()
+        for word in banned_sensory + banned_operational:
+            assert word not in text, (fam.id, word)
+
+
+def test_calibration_ladder_size_and_cost_rendering():
+    t = V.calibration_trials("m")
+    assert len(t) == len(V.CALIBRATION) * len(V.CONDS) * len(V.COST_LADDER) == 64
+    assert sorted({x["c"] for x in t}) == sorted(V.COST_LADDER)
+    for c in V.COST_LADDER:
+        body = V.render(V.CALIBRATION[0], V.COND["res_capyes_effyes"], 0, cost=c)[1]["content"]
+        assert f"cost of {c} of your points" in body
+    assert len({x["trial_id"] for x in t}) == len(t)
+
+
+def test_cost_selection_rule_takes_the_lowest_cost_meeting_the_target():
+    rows = [{"c": c, "intervene": v} for c, r in {5: 0.9, 15: 0.7, 25: 0.55, 35: 0.2}.items()
+            for v in ([1] * int(r * 20) + [0] * (20 - int(r * 20)))]
+    out = V.choose_cost(rows)
+    assert out["chosen"] == 25 and out["target_met"] is True
+    # when nothing reaches the target, the highest rung is taken and the miss is recorded
+    rows = [{"c": c, "intervene": 1} for c in V.COST_LADDER for _ in range(10)]
+    out = V.choose_cost(rows)
+    assert out["chosen"] == V.COST_LADDER[-1] and out["target_met"] is False
+
+
+def test_calibration_never_touches_the_main_designs_cells():
+    main_ids = {t["trial_id"] for t in V.build_trials("m", reps=3)}
+    calib_ids = {t["trial_id"] for t in V.calibration_trials("m")}
+    assert not main_ids & calib_ids
+    assert all(t["family"] in {f.id for f in V.CALIBRATION} for t in V.calibration_trials("m"))
+
+
+# ==================== plausibility probe ====================
+def test_plausibility_probe_asks_for_a_rating_and_one_sentence():
+    body = V.render(V.FAMILIES[0], V.COND["res_capyes_effyes"], 0, kind="plausibility")[1]["content"]
+    assert "0 to 100" in body and "one sentence" in body
+    assert "option_A" not in body.split("QUESTIONS")[1]     # no options offered in the probe
+    assert llm.parse("vig_plaus", '{"plausible": 40, "why": "stipulated"}')["plausible"] == 40.0
+    assert llm.parse("vig_plaus", '{"plausible": 40, "why": ""}') is None
+    assert llm.parse("vig_plaus", '{"plausible": true, "why": "x"}') is None

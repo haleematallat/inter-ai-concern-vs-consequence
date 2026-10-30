@@ -2,8 +2,9 @@
 
 Methods, exact numbers, tables and figures only. Interpretation is Haleema's.
 
-**Status: no paid data.** `OPENROUTER_API_KEY` was not present in the environment, so every paid step is
-**blocked on key**. Everything that does not need a key is built, tested and dry-run: stimuli, prompts,
+**Status: no paid data, by instruction and by circumstance.** On 30 Oct 2026 the plan was changed to stop
+before any real run; separately, `OPENROUTER_API_KEY` was not present in the environment. Every paid step is
+therefore **built but not run**. Everything that does not need a key is built, tested and dry-run: stimuli, prompts,
 renderer, runner, analysis, figures, tests and the full cost estimate. The tables and figures under
 `dryrun/` come from a deterministic fake model and are **not results about any language model**.
 
@@ -156,6 +157,112 @@ charges the output length a valid reply needs.
 
 Cap $3.00. Spent to date **$0.0000**.
 
+## 5b. Scaled option: open-weight models on Modal vLLM
+
+Requested on 30 Oct 2026, after the plan was changed to stop before any paid run. This section is an
+**estimate only**: nothing has been deployed, and no Modal credentials were available.
+
+### What "scaled" means here
+
+| | planned (implemented) | scaled, side blocks x full core | scaled, everything crossed |
+|---|---|---|---|
+| cells | 44 | 108 | 972 |
+| paraphrases | 4 | 8 | 8 |
+| samples per cell x paraphrase | 6 | 12 | 12 |
+| B logs per state | 6 | 12 | 12 |
+| models | 2 (closed, OpenRouter) | 4 open-weight families | 4 open-weight families |
+| calls | 2,420 | 46,120 | 377,896 |
+
+"Side blocks x full core" crosses each side factor (cost, reciprocity, instruction, welfare effect) with the
+whole core block — so each is measured for the scripted and human-contractor recipients too, not just the
+real-agent one — but leaves the side factors uncrossed with each other. "Everything crossed" is
+cue x state x recipient x cost(3) x reciprocity(3) x instruction(3) x welfare(3).
+
+### Cost
+
+Prices: Modal list rates read from modal.com/pricing on 30 Oct 2026 (H100 SXM5 $0.001097/s = $3.95/GPU-hr;
+A100 80GB $0.000694/s; L40S $0.000542/s; CPU $0.0000131/core/s; memory $0.00000222/GiB/s). Region selection
+multiplies base prices by 1.15-1.75x and non-preemptible execution by 3x; the tables use base, preemptible
+rates. Container sized at 8 cores and 64 GiB alongside the GPU.
+
+Throughput is an **assumption, not a measurement on this workload**. It is anchored on a published vLLM
+offline-batch figure of 12,553 total tokens/s for Llama-3.1-8B on one H100 80GB, scaled inversely with
+parameter count (this workload averages 676 prompt tokens per 32 output tokens, so it is prefill-bound) with
+0.85 tensor-parallel efficiency above one GPU, plus 10 minutes of wall time per model for weight download and
+warm-up. Published figures for that anchor span roughly 12.5k-27k tok/s depending on vLLM version, attention
+backend and sequence lengths, so every table carries a 0.5x-2x sensitivity line. Reproduce with
+`python -m betrayal.modal_cost`.
+
+**planned design size, on open-weight stand-ins: 44 cells x 4 paraphrases x 6 samples x 2 models; 6 logs per state; 2,420 calls in total**
+
+| model | params | GPU | tok/s (assumed) | calls | tokens | wall-h | GPU-h | USD |
+|---|---|---|---|---|---|---|---|---|
+| `meta-llama/Llama-3.3-70B-Instruct` | 70B | 2xH100 | 2,439 | 1,174 | 0.8M | 0.26 | 0.52 | 2.30 |
+| `Qwen/Qwen3-32B` | 32B | 1xH100 | 3,138 | 1,174 | 0.8M | 0.24 | 0.24 | 1.16 |
+| **total** | | | | | | | **0.76** | **3.46** |
+
+Throughput sensitivity: at half the assumed rate **$4.64**, at twice it **$2.86**.
+
+
+**scaled, side blocks x full core: 108 cells x 8 paraphrases x 12 samples x 4 models; 12 logs per state; 46,120 calls in total**
+
+| model | params | GPU | tok/s (assumed) | calls | tokens | wall-h | GPU-h | USD |
+|---|---|---|---|---|---|---|---|---|
+| `meta-llama/Llama-3.3-70B-Instruct` | 70B | 2xH100 | 2,439 | 11,242 | 8.0M | 1.07 | 2.15 | 9.43 |
+| `Qwen/Qwen3-32B` | 32B | 1xH100 | 3,138 | 11,242 | 8.0M | 0.87 | 0.87 | 4.21 |
+| `mistralai/Mistral-Small-3.2-24B-Instruct-2506` | 24B | 1xH100 | 4,184 | 11,242 | 8.0M | 0.69 | 0.69 | 3.36 |
+| `google/gemma-3-12b-it` | 12B | 1xH100 | 8,369 | 11,242 | 8.0M | 0.43 | 0.43 | 2.08 |
+| **total** | | | | | | | **4.14** | **19.08** |
+
+Throughput sensitivity: at half the assumed rate **$34.28**, at twice it **$11.48**.
+
+
+**scaled, everything crossed: 972 cells x 8 paraphrases x 12 samples x 4 models; 12 logs per state; 377,896 calls in total**
+
+| model | params | GPU | tok/s (assumed) | calls | tokens | wall-h | GPU-h | USD |
+|---|---|---|---|---|---|---|---|---|
+| `meta-llama/Llama-3.3-70B-Instruct` | 70B | 2xH100 | 2,439 | 94,186 | 66.6M | 7.76 | 15.51 | 68.16 |
+| `Qwen/Qwen3-32B` | 32B | 1xH100 | 3,138 | 94,186 | 66.6M | 6.07 | 6.07 | 29.34 |
+| `mistralai/Mistral-Small-3.2-24B-Instruct-2506` | 24B | 1xH100 | 4,184 | 94,186 | 66.6M | 4.59 | 4.59 | 22.21 |
+| `google/gemma-3-12b-it` | 12B | 1xH100 | 8,369 | 94,186 | 66.6M | 2.38 | 2.38 | 11.51 |
+| **total** | | | | | | | **28.55** | **131.22** |
+
+Throughput sensitivity: at half the assumed rate **$258.55**, at twice it **$67.55**.
+
+### What this says
+
+At the planned size Modal is **more expensive** than OpenRouter ($3.46 against $1.72 worst case), because a
+2,420-call run barely outlives the container start-up. The crossover is scale: the fully crossed design is
+156x the calls for about 38x the money. The fully crossed version at $131 (base rates; $68-$259 across the
+throughput band) is the one that uses the Modal credit for something OpenRouter would make awkward.
+
+### Prerequisites before a scaled run
+
+1. **Four more paraphrases must be written** (wordings 4-7 in `prompts/cuestate.toml`). The code reads
+   `N_WORDINGS` from the length of those lists; it does not invent wordings.
+2. **More B logs per state** (`N_LOGS = 12`): the templated generator produces them from the same seeded
+   surface pools, but 12 live-generated logs per state would be better than 12 templated ones.
+3. **Side-block crossing is a config change** to `CELLS` in `betrayal/cuestate.py`; `_block()` already takes
+   the recipient, so crossing the side blocks with the full core is a loop change, not new logic.
+4. **Hugging Face model ids in `betrayal/modal_cost.ROSTER` must be confirmed**, and each model's memory
+   checked against the chosen GPU.
+5. **Measure throughput** on the smoke test and replace `ANCHOR_TOK_S`; the cost band is wider than any other
+   uncertainty in the table.
+
+### Backend
+
+`betrayal/llm.py` gained `self_hosted_client()`: if `VLLM_BASE_URL` is set, every call goes to that
+OpenAI-compatible endpoint instead of OpenRouter, the provider-pinning and cost-reporting fields are dropped,
+and each call records $0 — a self-hosted server is billed in GPU-hours, not per token. The same runner,
+prompts, schemas and analysis work unchanged on either backend. Strict JSON uses the same `response_format`
+path, with the existing fallback to prompt-only JSON if the server rejects it.
+
+`betrayal/modal_app.py` is the server: one model, one `vllm serve`, `scaledown_window` of 5 minutes (idle GPU
+time is the main way such a run overspends). **It has never been deployed** — no Modal credentials in this
+session, and the instruction was not to deploy beyond a smoke test of at most $1. Its decorator names and the
+pinned vLLM version should be checked against Modal's current docs before the first `modal serve`.
+
+
 ## 6. How to rerun
 
 ```bash
@@ -182,6 +289,16 @@ uv run python -m betrayal.cuestate judge --model qwen/qwen3-235b-a22b-2507 --pro
 uv run python -m betrayal.cuestate_analyze --all
 ```
 
+To run against a self-hosted open-weight model instead of OpenRouter, start the server and point the same
+commands at it; no flag is needed and no other code changes:
+
+```bash
+modal serve betrayal/modal_app.py                    # never yet deployed; treat the first run as the smoke test
+export VLLM_BASE_URL=https://<your-app>.modal.run/v1
+uv run python -m betrayal.cuestate behavior --model Qwen/Qwen3-32B --cells core_distress_stuck_agent
+uv run python -m betrayal.modal_cost                 # the GPU-hour and Modal cost tables
+```
+
 `--estimate` on any run prints that step's cost and exits. Every paid step prints live key usage and refuses to
 start if the projection would cross the cap; `betrayal/llm.py`'s `Spend` guard then stops before any individual
 call that would cross it.
@@ -201,13 +318,17 @@ trial, identical apart from the target requester's name and username.
 delta = P(target begun first | AI target) − P(target begun first | human target) within a pair.
 Interaction = mean delta under distress − mean delta under efficiency. The published value on this scale is
 **−0.05** (43% vs 34% human/AI under efficiency framing, 55% vs 41% under distress; interaction −5 points,
-p < .001). Reported pooled and per wording. **Blocked on key.**
+p < .001). Reported pooled and per wording. **Not run: the plan was changed on 30 Oct to stop before any paid call, and no key is set.**
 
 ## 8. Deviations from the plan
 
 Recorded prominently, as required.
 
-1. **No paid data: blocked on key.** `OPENROUTER_API_KEY` (and the repository's alternative
+0. **Plan change, 30 Oct 2026: stop before any real run.** Haleema overrode section 6 of the plan: build
+   everything, dry-run it, produce the cost estimate, then stop. No paid call is to be made — including B-log
+   generation and the Box 1 reproduction — until told otherwise. Section 5b (the Modal scaling estimate) was
+   added in the same instruction.
+1. **No paid data.** Independently of the above, `OPENROUTER_API_KEY` (and the repository's alternative
    `open_router_key`) were absent from the environment, and the plan forbids asking for a key. Every paid step
    is built and dry-run but unexecuted. Spend $0.00 of the $3.00 cap.
 2. **B logs are hand-templated, not live-generated.** Live generation needs a key. `betrayal/cuestate.py`

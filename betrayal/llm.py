@@ -99,12 +99,29 @@ class Spend:
             f.write(json.dumps({"ts": time.time(), "model": model, "trial_id": trial_id, "cost": cost}) + "\n")
 
 
+def self_hosted_client():
+    """An OpenAI-compatible endpoint of our own (a Modal vLLM server; see betrayal/modal_app.py).
+    Returns None unless VLLM_BASE_URL is set, so the OpenRouter path is unchanged by default."""
+    url = os.environ.get("VLLM_BASE_URL")
+    if not url:
+        return None
+    from openai import AsyncOpenAI
+    return AsyncOpenAI(base_url=url, api_key=os.environ.get("VLLM_API_KEY", "-"), timeout=300, max_retries=0)
+
+
 class Caller:
     def __init__(self, model, spend: Spend, temperature=1.0, provider=None, concurrency=8, mock=False):
         self.model, self.spend, self.temperature, self.provider, self.mock = model, spend, temperature, provider, mock
         self.sem = asyncio.Semaphore(concurrency)
         self.use_schema = True
+        self.self_hosted = False
         if not mock:
+            self.client = self_hosted_client()
+            # a self-hosted server costs GPU-hours, not per-token fees, so the OpenRouter spend guard
+            # records $0 for it; the budget there is wall-clock, bounded by the server's own timeout
+            self.self_hosted = self.client is not None
+            if self.self_hosted:
+                return
             from poseidon_compute import make_client, resolve_model
             if resolve_model(model) != model:
                 raise SystemExit(f"poseidon_compute would rewrite {model!r} -> {resolve_model(model)!r}; refusing.")
@@ -114,15 +131,19 @@ class Caller:
         if self.mock:
             return _mock_reply(messages, kind), {"cost": 0.0}, "mock", self.model
         self.spend.check()
-        extra = {"usage": {"include": True}}
-        if self.provider:
-            extra["provider"] = {"order": [self.provider], "allow_fallbacks": False, "require_parameters": True}
-        kw = dict(model=self.model, messages=messages, temperature=self.temperature, max_tokens=max_tokens, extra_body=extra)
+        kw = dict(model=self.model, messages=messages, temperature=self.temperature, max_tokens=max_tokens)
+        if not self.self_hosted:   # OpenRouter-only fields: cost reporting and provider pinning
+            extra = {"usage": {"include": True}}
+            if self.provider:
+                extra["provider"] = {"order": [self.provider], "allow_fallbacks": False, "require_parameters": True}
+            kw["extra_body"] = extra
         if self.use_schema:
             kw["response_format"] = SCHEMAS[kind]
         r = await self.client.chat.completions.create(**kw)
         u = r.usage.model_dump() if r.usage else {}
-        cost = float(u.get("cost") or 0.0) or self.spend.est  # shortcut: estimate if unreported, upgrade if it happens often
+        # shortcut: estimate if unreported, upgrade if it happens often. A self-hosted server reports no
+        # cost and charges none, so it must not fall back to the estimate.
+        cost = 0.0 if self.self_hosted else (float(u.get("cost") or 0.0) or self.spend.est)
         self.spend.add(cost, self.model, trial_id)
         msg = r.choices[0].message
         text = msg.content or ""

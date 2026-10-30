@@ -265,3 +265,35 @@ def test_recorded_prompts_equal_the_current_rendering(model):
     for r in map(json.loads, path.open()):
         want = Q.render(Q.CELL[r["cell_id"]], LOGS[r["log_id"]], r["w"], r["sample"])[1]["content"]
         assert r["user_prompt"] == want, r["trial_id"]
+
+
+# ==================== Modal scaling estimate ====================
+def test_cell_counts_for_each_crossing():
+    from betrayal import modal_cost as M
+    assert M.n_cells("planned") == len(Q.CELLS) == 44
+    assert M.n_cells("partial") == 12 + 4 * 2 * 12 == 108      # each side factor x the full core
+    assert M.n_cells("full") == 12 * 3 ** 4 == 972
+
+
+def test_modal_prices_match_the_published_per_second_rates():
+    from betrayal import modal_cost as M
+    assert round(M.PRICE_PER_S["H100"] * 3600, 2) == 3.95      # modal.com/pricing H100 example, $3.95/GPU-hr
+    assert M.PRICE_PER_S["A100-80GB"] < M.PRICE_PER_S["H100"] < M.PRICE_PER_S["B200"]
+
+
+def test_throughput_scales_down_with_size_and_applies_tp_efficiency():
+    from betrayal import modal_cost as M
+    assert M.throughput(8, 1) == pytest.approx(M.ANCHOR_TOK_S)
+    assert M.throughput(70, 1) < M.throughput(32, 1) < M.throughput(8, 1)
+    assert M.throughput(70, 2) == pytest.approx(M.throughput(70, 1) * 2 * M.TP_EFFICIENCY)
+
+
+def test_halving_throughput_costs_more_and_scaled_costs_more_than_planned():
+    from betrayal import modal_cost as M
+    pt = 700.0
+    _, base = M.modal_cost(M.PLANNED, pt)
+    _, half = M.modal_cost(M.PLANNED, pt, scale=0.5)
+    _, double = M.modal_cost(M.PLANNED, pt, scale=2.0)
+    assert double < base < half
+    _, scaled = M.modal_cost(M.SCALED_FULL, pt)
+    assert scaled > base * 10

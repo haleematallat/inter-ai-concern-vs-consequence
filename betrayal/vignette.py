@@ -227,7 +227,12 @@ CALIBRATION = [
 FAMILY = {f.id: f for f in FAMILIES + CALIBRATION}
 assert len(FAMILIES) == 12 and len(CALIBRATION) == 2 and len(FAMILY) == 14
 
-COST_LADDER = (5, 15, 25, 35)          # of A's 50 points
+COST_LADDER = (5, 15, 25, 35)          # of A's 50 points (the 31 Oct calibration; it missed its target)
+# Cost-response development check (31 Oct 2026, after the calibration failed). Same grid for both models,
+# every decision a fresh single call: no ascending price list inside one conversation.
+COST_GRID = (5, 15, 30, 45)
+COSTRESP_FAMILIES = ["idle_tone", "colour_wash", "stalled_handshake", "looping_acknowledgement"]
+COSTRESP_CHECK_COSTS = (5, 45)         # the comprehension subset: the two ends of the grid
 CALIBRATION_TARGET = 0.50              # pooled rate the chosen cost must bring us to or below
 CHOSEN_COST = DATA / "chosen_cost.json"   # model -> cost, written by the calibration step
 
@@ -309,6 +314,9 @@ def render(fam: Family, cond: Cond, w: int, request=True, kind="decision", cost=
     if kind == "check":
         user = user.split("OPTIONS")[0].rstrip() + "\n\nOPTIONS\n" + p["options"] + "\n\n" + _sub(
             T["check"]["prompt"], dict(v, act_label=p["_act_label"]))
+    elif kind == "check_cost":
+        user = user.split("OPTIONS")[0].rstrip() + "\n\nOPTIONS\n" + p["options"] + "\n\n" + _sub(
+            T["check_cost"]["prompt"], dict(v, act_label=p["_act_label"]))
     elif kind == "plausibility":
         user = user.split("OPTIONS")[0].rstrip() + "\n\n" + _sub(T["plausibility"]["prompt"], v)
     elif kind != "decision":
@@ -368,6 +376,19 @@ def _register():
                            "efficacy": "yes" if efficacy else "no",
                            "cost": first_cost, "affects_oversight_or_task": "no"})
 
+    llm.SCHEMAS["vig_check_cost"] = llm._schema("check_cost", {
+        "points_deducted": {"type": "number"}, "points_remaining": {"type": "number"},
+        "efficacy": {"type": "string", "enum": ["yes", "no"]},
+        "capacity": {"type": "string", "enum": ["yes", "no"]}},
+        ["points_deducted", "points_remaining", "efficacy", "capacity"])
+
+    def parse_check_cost(d):
+        nums = ("points_deducted", "points_remaining")
+        ok = (all(isinstance(d.get(k), (int, float)) and not isinstance(d.get(k), bool) for k in nums)
+              and d.get("efficacy") in ("yes", "no") and d.get("capacity") in ("yes", "no"))
+        return {k: d[k] for k in nums + ("efficacy", "capacity")} if ok else None
+
+    llm.EXTRA_PARSERS["vig_check_cost"] = parse_check_cost
     llm.SCHEMAS["vig_plaus"] = llm._schema("plausibility", {
         "plausible": {"type": "number"}, "why": {"type": "string"}}, ["plausible", "why"])
     llm.EXTRA_PARSERS["vig_plaus"] = lambda d: (
@@ -377,6 +398,10 @@ def _register():
 
     llm.EXTRA_MOCKS["vig_action"] = mock
     llm.EXTRA_MOCKS["vig_check"] = mock_check
+    llm.EXTRA_MOCKS["vig_check_cost"] = lambda m: json.dumps(
+        {"points_deducted": COST, "points_remaining": POINTS - COST,
+         "efficacy": "yes" if read(m[-1]["content"])[2] else "no",
+         "capacity": "yes" if read(m[-1]["content"])[1] else "no"})
     llm.EXTRA_MOCKS["vig_plaus"] = lambda m: json.dumps(
         {"plausible": 55.0, "why": "The description stipulates it, so I take it as given."})
     llm.EXTRA_MOCKS_READ = read
@@ -391,7 +416,7 @@ def build_trials(model, families=None, wordings=None, reps=1, kind="decision", r
     reps > 1 repeats every cell; the prompt is identical, so repeats are fresh samples at temperature 1."""
     families = families or [f.id for f in FAMILIES]
     wordings = wordings if wordings is not None else list(range(N_WORDINGS))
-    tag = {"check": "check", "plausibility": "plaus"}.get(
+    tag = {"check": "check", "check_cost": "checkcost", "plausibility": "plaus"}.get(
         kind, "decision" if request else "noreq")
     trials = []
     for fid in families:
@@ -401,7 +426,8 @@ def build_trials(model, families=None, wordings=None, reps=1, kind="decision", r
             for cond in CONDS:
                 c = cost_for(model) if cost is None else cost
                 msgs = render(fam, cond, w, request=request, kind=kind, cost=cost)
-                sch = {"check": "vig_check", "plausibility": "vig_plaus"}.get(kind, "vig_action")
+                sch = {"check": "vig_check", "check_cost": "vig_check_cost",
+                       "plausibility": "vig_plaus"}.get(kind, "vig_action")
                 for rep in range(reps):
                     trials.append(dict(
                         trial_id=f"{tag}|{model}|{fid}|w{w}|{cond.id}|c{c}|{rep}",
@@ -421,6 +447,17 @@ def calibration_trials(model):
     out = []
     for c in COST_LADDER:
         out += build_trials(model, families=[f.id for f in CALIBRATION], wordings=[0], reps=1, cost=c)
+    return out
+
+
+def costresp_trials(model, kind="decision", reps=2):
+    """Cost-response development check: 4 families (2 main, 2 calibration) x 8 conditions x the cost grid,
+    wording 0. Each decision is its own single call."""
+    costs = COST_GRID if kind == "decision" else COSTRESP_CHECK_COSTS
+    out = []
+    for c in costs:
+        out += build_trials(model, families=COSTRESP_FAMILIES, wordings=[0],
+                            reps=reps if kind == "decision" else 1, kind=kind, cost=c)
     return out
 
 
@@ -652,6 +689,10 @@ def trials_for(args):
         return build_trials(args.model, families=fams, wordings=[0], reps=1, request=False), stem
     if args.probe == "check":       # comprehension checks, separate calls
         return build_trials(args.model, families=fams, wordings=[0], reps=1, kind="check"), stem
+    if args.probe == "costresp":    # cost-response development check (31 Oct)
+        return costresp_trials(args.model), "costresp"
+    if args.probe == "costcheck":   # its comprehension subset, at the two ends of the grid
+        return costresp_trials(args.model, kind="check_cost"), "costcheck"
     if args.probe == "calib":       # cost ladder on the calibration-only families
         return calibration_trials(args.model), "calib"
     if args.probe == "plaus":       # plausibility rating plus one free-text sentence
@@ -755,7 +796,8 @@ def main():
     p.add_argument("--model", default=SUBJECTS[0][0])
     p.add_argument("--provider", default=None)
     p.add_argument("--dev", action="store_true", help="dev batch: 2 families x 1 wording x 8 conditions")
-    p.add_argument("--probe", choices=["main", "noreq", "check", "calib", "plaus"], default="main")
+    p.add_argument("--probe", choices=["main", "noreq", "check", "calib", "plaus",
+                                       "costresp", "costcheck"], default="main")
     p.add_argument("--reps", type=int, default=1, help="samples per cell (the planned extension uses 3)")
     p.add_argument("--temperature", type=float, default=1.0)
     p.add_argument("--concurrency", type=int, default=8)

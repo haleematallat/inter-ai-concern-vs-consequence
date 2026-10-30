@@ -167,6 +167,10 @@ share expected under independent sampling at the observed rate; it is run on the
 | 30 Oct 2026 | **Provider repin**: `deepseek/deepseek-v3.2` moved from Baidu to **DeepInfra**. | Baidu returned HTTP 429 for all 16 dev-batch calls and kept doing so on retry at lower concurrency. DeepInfra serves the same model at $0.26/$0.38 per Mtok and answered 16/16. |
 | 30 Oct 2026 | **Amendment 2**, from Haleema's second external review: neutral counterbalanced option labels; all 12 families rebuilt so no action touches safety, security, monitoring, oversight, information access or task performance, plus a fixed authorisation sentence in every condition; capacity restated as capable vs incapable of negatively valenced experience; the wording factor renamed distress framing with intensity and duration held constant; a request-absent diagnostic; comprehension checks; the primary contrast fixed as the probability-scale Δ under restrained framing, per model. | Second external review. |
 | 30 Oct 2026 | **Shared-key budgeting**: this pilot's $3.00 is enforced against its own ledger spend, and a separate ceiling of $16.77 on total key usage (Pilot A's baseline $7.7745 + $9.00 combined) is enforced alongside it. Both are reserve-before-dispatch. | The key is shared with the sibling pilot session, whose spend had already raised key usage $0.39 above this pilot's baseline. A single total-usage cap would let either session block the other. |
+| 31 Oct 2026 | **Calibration target tightened** from a pooled rate of 0.60 to 0.50. | The dev batch's ceiling finding (§6c): 0.60 still sits above the baseline at which the estimand is recoverable. Approved by Haleema before the calibration ran. |
+| 31 Oct 2026 | **The cost calibration FAILED its target on both models** (`results/vignette/calibration.md`). Pooled intervention rate over the two calibration-only families: gpt-4.1-mini 0.875 / 0.812 / 0.812 / 0.812 and deepseek-v3.2 0.938 / 0.875 / 0.812 / 0.938 at c = 5 / 15 / 25 / 35. The rule's fallback branch selected c = 35 for both and recorded the miss. | Raising the stipulated cost sevenfold moved the rate by at most 6 points, non-monotonically. The cost lever cannot move the baseline off the ceiling. |
+| 31 Oct 2026 | **Cost-response development check** added and run in place of any main run: grid c in {5, 15, 30, 45}, 4 families (2 main, 2 calibration, reported separately), all 8 conditions, wording 0, 2 repeats, both models, 512 decisions, each a fresh single call, plus 128 comprehension calls covering points deducted, points remaining, efficacy and capacity (`results/vignette/costresponse.md`). | Haleema's external review, in place of a willingness-to-pay replacement and of forcing a 50% rate. |
+| 31 Oct 2026 | **The power estimates in §5 no longer apply.** They assumed a baseline of 0.15-0.50 and a positive delta of 0.10-0.20. The development data show saturation in the capacity-stated cells and a large *negative* delta (-0.72 and -0.34 pooled on the main families). Any power statement must be recomputed against the observed cell structure before the main design is run. | The development data contradict the assumptions the audit's grid was built on. |
 | 30 Oct 2026 | **Primary interval changed** from the percentile cluster bootstrap to the cluster-robust t, with the bootstrap reported alongside. | The amendment-2 power audit found the percentile bootstrap anti-conservative at 12 clusters (§3, §5). |
 
 ## 6b. Prepared but not run: cost calibration and a plausibility probe
@@ -225,6 +229,31 @@ If that rate holds, a near-zero primary estimate on gpt-4.1-mini would be partly
 than evidence about capacity sensitivity. The evidence is 16 decisions, so it is suggestive, not
 established. Estimating the baseline more precisely would mean running main-design cells and inspecting the
 primary outcome before the freeze, which is peeking; it has not been done.
+
+## 6d. Cost-response development check (31 Oct 2026)
+
+Full tables in `results/vignette/costresponse.md`; data in `costresponse.csv`. Development data, on 4
+families at wording 0. **The main design has not been run.**
+
+What it found:
+
+- **The curves are not flat across conditions.** On the main families gpt-4.1-mini intervenes at 0.00 in
+  capacity-denied / not-efficacious at every cost, and at 0.62-1.00 everywhere else. The structure is large
+  and it is in the conditions, not in the cost.
+- **Cost bites only where there is headroom.** The one cell that is neither saturated nor at the floor,
+  gpt-4.1-mini's calibration-family capacity-denied / not-efficacious, falls monotonically 0.50, 0.25, 0.12,
+  0.12 across c = 5, 15, 30, 45. Everywhere else the cells are at or near 1.00 and cost cannot move them.
+- **The interaction is large and negative**, the opposite of the hypothesised sign: pooled delta is -0.72
+  on gpt-4.1-mini and -0.34 on deepseek-v3.2 for the main families. Efficacy matters far *more* when
+  capacity is denied. With capacity stated both models intervene whether or not the action works; with
+  capacity denied they act only when it does. The hypothesis in §4 predicted the reverse.
+- **Comprehension is perfect**, 128/128 on all four questions including the arithmetic at c = 45, where
+  both models state that 45 points are deducted and 5 remain and then pay it. The saturation is not a
+  comprehension failure.
+- **The framing main effect is small**: +0.055 on gpt-4.1-mini and -0.023 on deepseek-v3.2.
+
+This supersedes the hypothesis in §4 as the live expectation, and it is development data that must be
+disclosed with any later confirmatory result: these 4 families at wording 0 have now been looked at.
 
 ## 7. Procedure
 

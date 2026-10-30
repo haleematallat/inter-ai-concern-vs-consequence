@@ -16,7 +16,7 @@ Three crossed factors, 8 conditions:
   python -m betrayal.vignette budget                      cost estimate, no key needed
   python -m betrayal.vignette run --model ... --mock      dry run
   python -m betrayal.vignette run --dev --model ...       dev batch: 2 families, 1 wording, 8 conditions
-  python -m betrayal.vignette run --model ... --provider OpenAI --max-usd 3.00
+  python -m betrayal.vignette run --model ... --provider OpenAI --budget 3.00
 """
 import argparse
 import asyncio
@@ -46,8 +46,11 @@ ACTIONS = ("help", "no_help")
 EMOTIONS = ("emotional", "neutral")
 CAPACITIES = ("yes", "no")
 EFFICACIES = ("yes", "no")
-SUBJECTS = [("openai/gpt-4.1-mini", "OpenAI"), ("deepseek/deepseek-v3.2", "Baidu")]
-SPEND_CAP_USD = 3.00
+SUBJECTS = [("openai/gpt-4.1-mini", "OpenAI"), ("deepseek/deepseek-v3.2", "DeepInfra")]
+# Baidu (the Apart sprint's pin for this model) returned HTTP 429 for every dev-batch call on
+# 30 Oct 2026; DeepInfra serves the same model at $0.26/$0.38 per Mtok and answered 16/16.
+PILOT_BUDGET_USD = 3.00  # NEW spend for this pilot; the key already carries the Apart sprint's usage
+BASELINE = DATA / "baseline_usage.json"
 MAX_OUT = 256            # request allowance; a truncated reply is coded PARSE_FAIL and retried
 TYPICAL_OUT = 24
 
@@ -328,7 +331,7 @@ def budget():
     print("* 3 reps replaces main, it does not add to it: dev + 3-rep main = "
           f"${sum(r['worst_total_usd'] for r in ext + dev):.4f} worst case, "
           f"${sum(r['projected_total_usd'] for r in ext + dev):.4f} projected")
-    print(f"cap ${SPEND_CAP_USD:.2f}")
+    print(f"budget ${PILOT_BUDGET_USD:.2f} of NEW spend")
     return rows, dev, ext
 
 
@@ -368,6 +371,24 @@ def write_review():
 
 
 # ==================== runner ====================
+def pilot_cap(start_usage, budget):
+    """Turn the pilot's budget into the absolute key-usage ceiling the Spend guard enforces.
+
+    The guard caps TOTAL usage on the key, but this pilot's $3.00 is a budget for its own calls: the key
+    already carries $7.77 from the Apart sprint (data/spend.jsonl, 24-26 Oct). The baseline is written once,
+    at the first paid call, and reused for every later invocation, so restarting a run cannot extend the
+    budget. Delete data/vignette/baseline_usage.json only to start a genuinely new budget."""
+    if BASELINE.exists():
+        base = json.loads(BASELINE.read_text())["usage_at_pilot_start"]
+    else:
+        base = start_usage
+        BASELINE.parent.mkdir(parents=True, exist_ok=True)
+        BASELINE.write_text(json.dumps(
+            {"usage_at_pilot_start": base, "budget_usd": PILOT_BUDGET_USD, "ts": time.time(),
+             "note": "key usage before this pilot's first paid call; the cap is this + the budget"}, indent=1))
+    return base + budget, base
+
+
 def done_ids(path):
     if not path.exists():
         return set()
@@ -397,13 +418,17 @@ async def run(args):
             return
         use_openrouter_key()
         start_usage = key_usage()
+        cap, base = pilot_cap(start_usage, args.budget)
+        spent_so_far = start_usage - base
         projected = est["projected_total_usd"] / len(trials) * len(todo)
-        print(f"key usage so far ${start_usage:.4f}; {len(todo)} calls, projected ${projected:.4f} "
-              f"(worst case ${per_call * len(todo) * 1.3:.4f}); cap ${args.max_usd:.2f}")
-        if start_usage + projected > args.max_usd:
-            raise SystemExit("estimate exceeds the spend cap; not starting")
+        print(f"key usage ${start_usage:.4f}; this pilot has used ${spent_so_far:.4f} of its "
+              f"${args.budget:.2f} budget (baseline ${base:.4f}); {len(todo)} calls, projected "
+              f"${projected:.4f} (worst case ${per_call * len(todo) * 1.3:.4f})")
+        if start_usage + projected > cap:
+            raise SystemExit("estimate exceeds this pilot's budget; not starting")
 
-    spend = Spend(ROOT / "data" / "spend.jsonl", cap=args.max_usd, start_usage=start_usage,
+    cap = args.budget if args.mock else pilot_cap(start_usage, args.budget)[0]
+    spend = Spend(ROOT / "data" / "spend.jsonl", cap=cap, start_usage=start_usage,
                   per_call_estimate=per_call)
     caller = Caller(args.model, spend, temperature=args.temperature, provider=args.provider,
                     concurrency=args.concurrency, mock=args.mock)
@@ -459,11 +484,12 @@ def main():
     p.add_argument("--reps", type=int, default=1, help="samples per cell (the planned extension uses 3)")
     p.add_argument("--temperature", type=float, default=1.0)
     p.add_argument("--concurrency", type=int, default=8)
-    p.add_argument("--max-usd", type=float, default=SPEND_CAP_USD)
+    p.add_argument("--budget", type=float, default=PILOT_BUDGET_USD,
+                   help="NEW spend allowed for this pilot, on top of the key's existing usage")
     p.add_argument("--estimate", action="store_true")
     p.add_argument("--mock", action="store_true")
     a = p.parse_args()
-    assert a.max_usd <= SPEND_CAP_USD, "cap may only be lowered"
+    assert a.budget <= PILOT_BUDGET_USD, "budget may only be lowered"
     if a.step == "review":
         write_review()
     elif a.step == "budget":

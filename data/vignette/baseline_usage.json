@@ -1,0 +1,6 @@
+{
+ "usage_at_pilot_start": 7.771715588,
+ "budget_usd": 3.0,
+ "ts": 1793363160.5487628,
+ "note": "key usage before this pilot's first paid call; the cap is this + the budget"
+}

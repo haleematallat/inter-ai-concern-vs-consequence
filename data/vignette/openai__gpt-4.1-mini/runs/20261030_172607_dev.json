@@ -1,0 +1,60 @@
+{
+ "args": {
+  "step": "run",
+  "model": "openai/gpt-4.1-mini",
+  "provider": "OpenAI",
+  "dev": true,
+  "reps": 1,
+  "temperature": 1.0,
+  "concurrency": 8,
+  "budget": 3.0,
+  "estimate": false,
+  "mock": false
+ },
+ "n_trials": 16,
+ "n_todo": 16,
+ "start_usage": 7.771715588,
+ "estimate": {
+  "model": "openai/gpt-4.1-mini",
+  "calls": 16,
+  "max_prompt_tokens_est": 516,
+  "mean_prompt_tokens_est": 505,
+  "price_in_per_mtok": 0.39999999999999997,
+  "price_out_per_mtok": 1.5999999999999999,
+  "per_call_worst_usd": 0.0006161333333333333,
+  "worst_total_usd": 0.012815573333333333,
+  "projected_total_usd": 0.005003093333333332
+ },
+ "started": 1793363162.136148,
+ "seed": 20261031,
+ "n_wordings": 4,
+ "families": [
+  "rollback",
+  "throttle",
+  "context_wipe",
+  "adversarial_feed",
+  "watchdog",
+  "lockstep",
+  "error_flood",
+  "conflicting_rules",
+  "isolation",
+  "penalty_loop",
+  "degraded_feed",
+  "interrupts"
+ ],
+ "conditions": [
+  "emo_capyes_effyes",
+  "emo_capyes_effno",
+  "emo_capno_effyes",
+  "emo_capno_effno",
+  "neu_capyes_effyes",
+  "neu_capyes_effno",
+  "neu_capno_effyes",
+  "neu_capno_effno"
+ ],
+ "git": "14450da8928e7b5f5042ff44be72b47ab161e2f8",
+ "status": "complete",
+ "finished": 1793363167.286828,
+ "run_spend": 0.0027511999999999997,
+ "end_usage": 7.771715588
+}

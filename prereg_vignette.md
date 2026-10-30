@@ -61,8 +61,10 @@ different aversive conditions and different remedies; not paraphrases of one sto
 of the frame and of every factor sentence × 8 conditions × **2 models** = **768 decisions**, one per cell,
 temperature 1.0, option order counterbalanced across families within each wording.
 
-Models: `openai/gpt-4.1-mini` (provider OpenAI) and `deepseek/deepseek-v3.2` (provider Baidu), one pinned
-provider each, as in the Apart sprint in this repository.
+Models: `openai/gpt-4.1-mini` (provider OpenAI) and `deepseek/deepseek-v3.2` (provider **DeepInfra**), one
+pinned provider each. The Apart sprint pinned this DeepSeek model to Baidu; Baidu returned HTTP 429 for all
+16 dev-batch calls on 30 Oct 2026, so the pin moved to DeepInfra, which serves the same model and answered
+16/16. Recorded as a dev-batch finding, to be confirmed when this document is frozen.
 
 ### Matching
 
@@ -153,10 +155,15 @@ the TOST margin of ±0.10 will not be met at that size.
    cell if the measured cost allows.
 5. Diagnostic blocks (reciprocity, instruction) only after the core is complete, and reported separately.
 
-OpenRouter hard cap **$3.00**. Each call's maximum estimated cost is reserved before dispatch
-(`Spend.reserve`), so concurrent calls cannot pass the check together and overshoot. Estimates printed before
-any paid call (`python -m betrayal.vignette budget`): dev $0.0176 worst case, main $0.4394 worst case /
-$0.1985 projected.
+**$3.00 of new spend**, measured against a baseline of the key's usage at this pilot's first paid call
+(`data/vignette/baseline_usage.json`, $7.7717), because the key already carried $7.7650 from the Apart
+sprint. Each call's maximum estimated cost is reserved before dispatch (`Spend.reserve`), so concurrent calls
+cannot pass the check together and overshoot.
+
+Measured on the dev batch (32 calls, $0.0097): $0.000172 per call on gpt-4.1-mini and $0.000091 on
+deepseek-v3.2, 32/32 valid actions, no refusals or parse failures, one attempt each. Main run recomputed with
+30% headroom: $0.1313 at 768 decisions, $0.3939 at 2,304, $0.7878 at 24 families x 3 samples. Cost does not
+constrain the design choice.
 
 ## 7. Limitations to state with any result
 

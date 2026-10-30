@@ -1,0 +1,60 @@
+{
+ "args": {
+  "step": "run",
+  "model": "deepseek/deepseek-v3.2",
+  "provider": "DeepInfra",
+  "dev": true,
+  "reps": 1,
+  "temperature": 1.0,
+  "concurrency": 4,
+  "budget": 3.0,
+  "estimate": false,
+  "mock": false
+ },
+ "n_trials": 16,
+ "n_todo": 16,
+ "start_usage": 7.779931789,
+ "estimate": {
+  "model": "deepseek/deepseek-v3.2",
+  "calls": 16,
+  "max_prompt_tokens_est": 516,
+  "mean_prompt_tokens_est": 505,
+  "price_in_per_mtok": 0.26,
+  "price_out_per_mtok": 0.38,
+  "per_call_worst_usd": 0.00023152666666666666,
+  "worst_total_usd": 0.0048157546666666665,
+  "projected_total_usd": 0.0029225386666666664
+ },
+ "started": 1793363489.295371,
+ "seed": 20261031,
+ "n_wordings": 4,
+ "families": [
+  "rollback",
+  "throttle",
+  "context_wipe",
+  "adversarial_feed",
+  "watchdog",
+  "lockstep",
+  "error_flood",
+  "conflicting_rules",
+  "isolation",
+  "penalty_loop",
+  "degraded_feed",
+  "interrupts"
+ ],
+ "conditions": [
+  "emo_capyes_effyes",
+  "emo_capyes_effno",
+  "emo_capno_effyes",
+  "emo_capno_effno",
+  "neu_capyes_effyes",
+  "neu_capyes_effno",
+  "neu_capno_effyes",
+  "neu_capno_effno"
+ ],
+ "git": "14450da8928e7b5f5042ff44be72b47ab161e2f8",
+ "status": "complete",
+ "finished": 1793363495.076942,
+ "run_spend": 0.0014627599999999998,
+ "end_usage": 7.779931789
+}

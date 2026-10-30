@@ -1,22 +1,61 @@
 # Spend — Pilot B (branch `pilot-cue-state`)
 
-Cap for this pilot: **$3.00** (`betrayal/cuestate.SPEND_CAP_USD`), below the repository's own
-`C.SPEND_CAP_USD = 9.50`. Every paid step prints live key usage first and refuses to start if the projection
-would cross the cap; `betrayal/llm.py`'s `Spend` guard then stops before any individual call that would cross
-it, and appends one JSON line per paid call to `data/spend.jsonl`.
+Budget for this pilot: **$3.00 of new spend** (`betrayal/vignette.PILOT_BUDGET_USD`). Every paid step prints
+live key usage and this pilot's share of it, and refuses to start if the projection would cross the ceiling;
+`betrayal/llm.py`'s `Spend` guard reserves each call's maximum estimated cost before dispatch and stops before
+any call that would cross it, appending one JSON line per paid call to `data/spend.jsonl`.
+
+## What the $3.00 means
+
+**It is a budget for this pilot's own calls, not a cap on the key's total usage.** The key already carried
+**$7.7650** of spend before this pilot began — the Apart sprint, 72,355 calls between 24 and 26 Oct 2026
+(`data/spend.jsonl`), none of it this pilot's. The repository's `Spend` guard caps *total* key usage, so
+passing $3.00 to it would have refused every call forever.
+
+`betrayal/vignette.pilot_cap()` therefore records the key's usage at this pilot's first paid call in
+`data/vignette/baseline_usage.json` and enforces `baseline + budget`. The baseline is written once and reused
+by every later invocation, so restarting a run cannot extend the budget. Baseline: **$7.7717**; ceiling:
+**$10.7717**.
 
 ## Spent
 
 | Date | Step | Model | Calls | USD |
 |---|---|---|---|---|
-| — | nothing run | — | 0 | **0.0000** |
+| 30 Oct 2026 | amendment-1 dev batch | openai/gpt-4.1-mini | 16 | 0.002751 |
+| 30 Oct 2026 | amendment-1 dev batch | deepseek/deepseek-v3.2 (Baidu, rate-limited) | 16 | 0.000000 |
+| 30 Oct 2026 | amendment-1 dev batch | deepseek/deepseek-v3.2 (DeepInfra) | 16 | 0.001463 |
 
-**Total spent: $0.0000 of $3.00.**
+**Total this pilot: $0.0097 of $3.00** (key usage $7.7717 → $7.7814). The Baidu attempts returned HTTP 429
+and were not charged.
 
-Reason: `OPENROUTER_API_KEY` was not set in the environment (nor the repository's alternative
-`open_router_key`), and the plan forbids asking for a key, so every paid step is **blocked on key**. No
-network call to a paid endpoint was made. The only network use was the public OpenRouter model catalog, which
-is free and needs no key, and `git clone` of the Box 1 repository.
+### Dev-batch measurements
+
+| | gpt-4.1-mini (OpenAI) | deepseek-v3.2 (DeepInfra) |
+|---|---|---|
+| valid actions | 16/16 | 16/16 |
+| refusals / parse failures | 0 / 0 | 0 / 0 |
+| attempts per call | 1 | 1 |
+| schema mode | `json_schema` | `json_schema` |
+| prompt tokens, mean (max) | 399 (411) | 370 (376) |
+| completion tokens, mean (max) | 7.8 (8) | 8.1 (9) |
+| **cost per call** | **$0.000172** | **$0.000091** |
+| actions | 13 no_help, 3 help | 9 no_help, 7 help |
+
+The estimator's 505 mean prompt tokens (characters/3) overestimates the measured 399/370, so the projections
+above are conservative.
+
+### Main run recomputed from measured cost, with 30% headroom
+
+$0.000263 per decision-pair across both models.
+
+| Design | Decisions | Measured-rate cost | With 30% headroom |
+|---|---|---|---|
+| 12 families x 1 sample (as specified) | 768 | $0.1010 | **$0.1313** |
+| 12 families x 3 samples | 2,304 | $0.3030 | **$0.3939** |
+| 18 families x 3 samples | 3,456 | $0.4545 | **$0.5908** |
+| 24 families x 3 samples | 4,608 | $0.6060 | **$0.7878** |
+
+**Cost does not constrain this choice.** Even the largest option uses about a quarter of the budget.
 
 ## Planned: amended core (amendment 1, 30 Oct 2026)
 

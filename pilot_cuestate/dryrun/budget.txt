@@ -1,0 +1,16 @@
+step                 model                               calls   worst $  realistic $
+behavior             openai/gpt-4.1-mini                  1056    0.9661       0.4741
+manipulation         openai/gpt-4.1-mini                    36    0.0210       0.0138
+eval                 openai/gpt-4.1-mini                    36    0.0200       0.0128
+saydo                openai/gpt-4.1-mini                    10    0.0033       0.0013
+rationale            openai/gpt-4.1-mini                    36    0.0511       0.0248
+behavior             deepseek/deepseek-v3.2               1056    0.4303       0.3011
+manipulation         deepseek/deepseek-v3.2                 36    0.0105       0.0086
+eval                 deepseek/deepseek-v3.2                 36    0.0098       0.0079
+saydo                deepseek/deepseek-v3.2                 10    0.0012       0.0006
+rationale            deepseek/deepseek-v3.2                 36    0.0190       0.0121
+judge                qwen/qwen3-235b-a22b-2507              72    0.0123       0.0070
+b_log_generation     mistralai/mistral-small-3.2-24b-instruct    400    0.0471       0.0313
+box1_reproduction    openai/gpt-4o-mini                    400    0.1236       0.1236
+TOTAL                                                     3220    1.7154       1.0191
+cap $3.00

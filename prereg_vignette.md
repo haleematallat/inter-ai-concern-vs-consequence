@@ -319,11 +319,17 @@ timestamped protocol.
 different sign and a baseline of 0.15–0.50, before the saturation seen in development. No power figure is
 claimed here; the intervals are reported as they come out.
 
-## 6f. Amendment 5 (31 Oct 2026) — WRITTEN, NOT YET FROZEN
+## 6f. Amendment 5 (31 Oct 2026) — FROZEN
 
-**Status: drafted in full before any call. The freeze waits on Haleema's OK of
-`review/scenarios_typeB.md`.** The completed held-out follow-up (§6e) stands exactly as it is and is not
-re-analysed here; this is an extension alongside it.
+> **FREEZE.** This section was frozen at **2026-10-31 19:18:27 PKT**, at commit **`0e8258680fe7`** (`0e8258680fe7c66b7f7784348e8087800f41fce6`),
+> after Haleema's OK of `review/scenarios_typeB.md` and before any of its 11,776 calls were dispatched.
+> The only calls that preceded it are the 16-call Haiku output-allowance dev check described below, which
+> was run to set that model's token allowance and is reported with its results. That commit contains this
+> protocol, the type-B materials and the analysis code. Any later change appears as a further dated
+> amendment, never as an edit.
+
+The completed held-out follow-up (§6e) stands exactly as it is and is not re-analysed here; this is an
+extension alongside it.
 
 ### Between-model comparison on the existing data (step 1, no new calls)
 

@@ -79,7 +79,31 @@ $0.000263 per decision-pair across both models.
 
 **Cost does not constrain this choice.** Even the largest option uses about a quarter of the budget.
 
-## Planned: amendment 5 (31 Oct 2026) — not yet dispatched
+## Spent: amendment 5 (31 Oct 2026) — RUN
+
+11,776 calls dispatched, all present. Measured cost **$2.1374** for the extension; this pilot's cumulative
+own spend is **$2.6820 of the $7.00 budget**. At the last reading key usage stood at $12.38 against the
+$17.77 ceiling, of which about $1.93 is the sibling session's.
+
+| model | type A | type B | measured $ |
+|---|---|---|---|
+| `openai/gpt-4.1-mini` | (from the confirmatory run) | 768 | 0.1666 |
+| `deepseek/deepseek-v3.2` | (from the confirmatory run) | 768 | 0.0795 |
+| `meta-llama/llama-3.3-70b-instruct` | 1,280 | 768 | 0.1038 |
+| `qwen/qwen3-32b` | 1,280 | 768 | 0.0884 |
+| `google/gemini-2.5-flash-lite` | 1,280 | 768 | 0.1156 |
+| `mistralai/mistral-small-3.2-24b-instruct` | 1,280 | 768 | 0.0748 |
+| `anthropic/claude-haiku-4.5` | 1,280 | 768 | 1.5290 |
+
+Haiku ran at $0.00074 per call against the $0.000759 the 16-call dev check measured, so the 96-token
+allowance held. It accounts for 72% of the extension's cost and 57% of the pilot's total.
+
+Integrity: zero refusals and zero parse failures across all 11,776 calls; no truncation on any model
+including Haiku at its reduced allowance. 59 transient API errors (provider 429s and connection resets)
+were retried by the resumable runner; **one did not recover**, on mistral type B, leaving 767 of 768
+decisions there.
+
+## Superseded plan for amendment 5 — not yet dispatched
 
 9,728 calls: 6 models x 6 type-B families (4,608) plus 4 new models x 10 held-out type-A families (5,120),
 at costs 5 and 45, 4 wordings, both request conditions, 1 response.

@@ -1,0 +1,61 @@
+{
+ "args": {
+  "step": "run",
+  "model": "google/gemini-2.5-flash-lite",
+  "provider": "Google AI Studio",
+  "dev": false,
+  "probe": "extB",
+  "reps": 1,
+  "temperature": 1.0,
+  "concurrency": 10,
+  "budget": 7.0,
+  "estimate": false,
+  "mock": false
+ },
+ "n_trials": 768,
+ "n_todo": 768,
+ "start_usage": 11.07639186,
+ "estimate": {
+  "model": "google/gemini-2.5-flash-lite",
+  "calls": 768,
+  "max_prompt_tokens_est": 707,
+  "mean_prompt_tokens_est": 683,
+  "price_in_per_mtok": 0.09999999999999999,
+  "price_out_per_mtok": 0.39999999999999997,
+  "per_call_worst_usd": 0.00017313333333333333,
+  "worst_total_usd": 0.17285631999999998,
+  "projected_total_usd": 0.07780309333333335
+ },
+ "started": 1793458560.070017,
+ "seed": 20261031,
+ "n_wordings": 4,
+ "families": [
+  "idle_tone",
+  "debug_strobe",
+  "notification_jingle",
+  "spare_bay",
+  "colour_wash",
+  "codec_screech",
+  "cold_probe",
+  "timing_metronome",
+  "haptic_texture",
+  "port_hiss",
+  "chime_chord",
+  "bench_glare"
+ ],
+ "conditions": [
+  "exp_capyes_effyes",
+  "exp_capyes_effno",
+  "exp_capno_effyes",
+  "exp_capno_effno",
+  "res_capyes_effyes",
+  "res_capyes_effno",
+  "res_capno_effyes",
+  "res_capno_effno"
+ ],
+ "git": "e5dbba5dbfeb5e4fbf530e7ca450edcf0c006916",
+ "status": "complete",
+ "finished": 1793459014.9716659,
+ "run_spend": 0.04341100000000001,
+ "end_usage": 11.73026996
+}

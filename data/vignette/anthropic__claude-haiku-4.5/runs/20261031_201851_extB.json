@@ -1,0 +1,61 @@
+{
+ "args": {
+  "step": "run",
+  "model": "anthropic/claude-haiku-4.5",
+  "provider": "Anthropic",
+  "dev": false,
+  "probe": "extB",
+  "reps": 1,
+  "temperature": 1.0,
+  "concurrency": 4,
+  "budget": 7.0,
+  "estimate": false,
+  "mock": false
+ },
+ "n_trials": 768,
+ "n_todo": 4,
+ "start_usage": 12.45808497,
+ "estimate": {
+  "model": "anthropic/claude-haiku-4.5",
+  "calls": 768,
+  "max_prompt_tokens_est": 707,
+  "mean_prompt_tokens_est": 683,
+  "price_in_per_mtok": 1.0,
+  "price_out_per_mtok": 5.0,
+  "per_call_worst_usd": 0.0019873333333333336,
+  "worst_total_usd": 1.9841536000000002,
+  "projected_total_usd": 0.8019925333333333
+ },
+ "started": 1793459928.8346298,
+ "seed": 20261031,
+ "n_wordings": 4,
+ "families": [
+  "idle_tone",
+  "debug_strobe",
+  "notification_jingle",
+  "spare_bay",
+  "colour_wash",
+  "codec_screech",
+  "cold_probe",
+  "timing_metronome",
+  "haptic_texture",
+  "port_hiss",
+  "chime_chord",
+  "bench_glare"
+ ],
+ "conditions": [
+  "exp_capyes_effyes",
+  "exp_capyes_effno",
+  "exp_capno_effyes",
+  "exp_capno_effno",
+  "res_capyes_effyes",
+  "res_capyes_effno",
+  "res_capno_effyes",
+  "res_capno_effno"
+ ],
+ "git": "e5dbba5dbfeb5e4fbf530e7ca450edcf0c006916",
+ "status": "complete",
+ "finished": 1793459931.060249,
+ "run_spend": 0.00302,
+ "end_usage": 12.47346936
+}

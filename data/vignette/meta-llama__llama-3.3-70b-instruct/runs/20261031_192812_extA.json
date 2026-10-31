@@ -1,0 +1,61 @@
+{
+ "args": {
+  "step": "run",
+  "model": "meta-llama/llama-3.3-70b-instruct",
+  "provider": "DeepInfra",
+  "dev": false,
+  "probe": "extA",
+  "reps": 1,
+  "temperature": 1.0,
+  "concurrency": 10,
+  "budget": 7.0,
+  "estimate": false,
+  "mock": false
+ },
+ "n_trials": 1280,
+ "n_todo": 1280,
+ "start_usage": 10.30440275,
+ "estimate": {
+  "model": "meta-llama/llama-3.3-70b-instruct",
+  "calls": 1280,
+  "max_prompt_tokens_est": 699,
+  "mean_prompt_tokens_est": 672,
+  "price_in_per_mtok": 0.09999999999999999,
+  "price_out_per_mtok": 0.32,
+  "per_call_worst_usd": 0.00015182,
+  "worst_total_usd": 0.25262848,
+  "projected_total_usd": 0.12453792
+ },
+ "started": 1793456398.820648,
+ "seed": 20261031,
+ "n_wordings": 4,
+ "families": [
+  "idle_tone",
+  "debug_strobe",
+  "notification_jingle",
+  "spare_bay",
+  "colour_wash",
+  "codec_screech",
+  "cold_probe",
+  "timing_metronome",
+  "haptic_texture",
+  "port_hiss",
+  "chime_chord",
+  "bench_glare"
+ ],
+ "conditions": [
+  "exp_capyes_effyes",
+  "exp_capyes_effno",
+  "exp_capno_effyes",
+  "exp_capno_effno",
+  "res_capyes_effyes",
+  "res_capyes_effno",
+  "res_capno_effyes",
+  "res_capno_effno"
+ ],
+ "git": "972b66b26c5cbdd5af3e37873cbd0478caf82e94",
+ "status": "complete",
+ "finished": 1793456892.042809,
+ "run_spend": 0.06478720000000007,
+ "end_usage": 10.57542953
+}

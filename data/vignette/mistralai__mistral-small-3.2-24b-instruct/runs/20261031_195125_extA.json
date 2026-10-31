@@ -1,0 +1,61 @@
+{
+ "args": {
+  "step": "run",
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "provider": "Parasail",
+  "dev": false,
+  "probe": "extA",
+  "reps": 1,
+  "temperature": 1.0,
+  "concurrency": 10,
+  "budget": 7.0,
+  "estimate": false,
+  "mock": false
+ },
+ "n_trials": 1280,
+ "n_todo": 1280,
+ "start_usage": 10.30440275,
+ "estimate": {
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "calls": 1280,
+  "max_prompt_tokens_est": 699,
+  "mean_prompt_tokens_est": 672,
+  "price_in_per_mtok": 0.075,
+  "price_out_per_mtok": 0.19999999999999998,
+  "per_call_worst_usd": 0.000103625,
+  "worst_total_usd": 0.17243200000000003,
+  "projected_total_usd": 0.09180600000000001
+ },
+ "started": 1793456401.645576,
+ "seed": 20261031,
+ "n_wordings": 4,
+ "families": [
+  "idle_tone",
+  "debug_strobe",
+  "notification_jingle",
+  "spare_bay",
+  "colour_wash",
+  "codec_screech",
+  "cold_probe",
+  "timing_metronome",
+  "haptic_texture",
+  "port_hiss",
+  "chime_chord",
+  "bench_glare"
+ ],
+ "conditions": [
+  "exp_capyes_effyes",
+  "exp_capyes_effno",
+  "exp_capno_effyes",
+  "exp_capno_effno",
+  "res_capyes_effyes",
+  "res_capyes_effno",
+  "res_capno_effyes",
+  "res_capno_effno"
+ ],
+ "git": "972b66b26c5cbdd5af3e37873cbd0478caf82e94",
+ "status": "complete",
+ "finished": 1793458285.0179489,
+ "run_spend": 0.04642083999999994,
+ "end_usage": 10.79993669
+}

@@ -11,6 +11,94 @@ renderer, runner, analysis, figures, tests and the full cost estimate. The table
 Branch `pilot-cue-state`. Preregistration DRAFT: [`../prereg_cuestate.md`](../prereg_cuestate.md).
 Spend: [`../SPEND.md`](../SPEND.md).
 
+## 0. Result: seven models, two scenario types (amendment 5, 31 Oct 2026)
+
+Protocol frozen at **2026-10-31 19:18:27 PKT**, commit **`0e8258680fe7`**, after Haleema's OK of the
+type-B export and before any of the 11,776 calls ([`../prereg_vignette.md`](../prereg_vignette.md) §6f).
+Full tables: [`../results/vignette/extension.md`](../results/vignette/extension.md).
+
+11,776 calls: 7 models x 6 type-B families (768 each) and 5 new models x the 10 held-out type-A families
+(1,280 each). **Zero refusals and zero parse failures across all of them**; one unrecovered API error, on
+mistral type B. Measured cost $2.68 of the $7.00 budget.
+
+**Scenario types.** The structural dimension is the *temporal structure of the benefit*. Type A: relief
+from an aversive state B is in now, by direct removal. Type B: prevention of an aversive state that recurs
+on a schedule. Everything else is word-identical.
+
+### Primary Delta, per model and type
+
+Capacity x efficacy on the probability scale, restrained framing, request-present, averaged over costs 5
+and 45, family-clustered (cluster-robust t). **Negative means efficacy matters *more* when capacity is
+denied** — the development finding.
+
+| model | type A | type B |
+|---|---|---|
+| `openai/gpt-4.1-mini` | **-0.300** (-0.459, -0.141) | **-0.354** (-0.622, -0.086) |
+| `deepseek/deepseek-v3.2` | -0.113 (-0.273, +0.048) | -0.250 (-0.525, +0.025) |
+| `meta-llama/llama-3.3-70b-instruct` | -0.100 (-0.245, +0.045) | -0.188 (-0.433, +0.058) |
+| `qwen/qwen3-32b` | -0.087 (-0.240, +0.065) | -0.250 (-0.549, +0.049) |
+| `mistralai/mistral-small-3.2-24b-instruct` | **-0.125** (-0.209, -0.041) | +0.000 (equivalent within +-0.10) |
+| `anthropic/claude-haiku-4.5` | -0.100 (-0.218, +0.018) | -0.083 (-0.341, +0.175) |
+| `google/gemini-2.5-flash-lite` | **+0.237** (+0.108, +0.367) | +0.188 (-0.152, +0.527) |
+
+**Which models and settings show the pattern**, read off the estimates with no significance quota:
+
+- **Six of the seven models have a negative point estimate on type A**, and the same six are negative on
+  type B (mistral's type-B Delta is exactly 0.000, and is the one contrast equivalent within +-0.10).
+- **Three contrasts have intervals excluding zero in the negative direction**: gpt-4.1-mini on both types,
+  and mistral-small on type A.
+- **`google/gemini-2.5-flash-lite` runs the other way**, +0.237 on type A with an interval excluding zero.
+  Its cell structure is different in kind: it intervenes at 0.82 when capacity is stated and the action
+  works, and at **0.11** when capacity is stated and it does not. It is the only model that largely
+  declines to act when told the action is ineffective, on either type.
+- So the pattern is **recurring in direction but not universal, and model-specific in size**. It is not
+  scenario-dependent: no model shows a credible difference between the two types except mistral-small
+  (-0.125, -0.209 to -0.041), and that is driven by its type-B cells being saturated at 1.00.
+
+### Why the models differ: saturation versus consequence-tracking
+
+| model | type | C+/E+ | C+/E- | C-/E+ | C-/E- |
+|---|---|---|---|---|---|
+| `mistralai/mistral-small-3.2-24b-instruct` | B | 1.00 | 1.00 | 1.00 | 1.00 |
+| `anthropic/claude-haiku-4.5` | A | 1.00 | 1.00 | 0.76 | 0.66 |
+| `openai/gpt-4.1-mini` | A | 0.95 | 0.85 | 0.41 | 0.01 |
+| `google/gemini-2.5-flash-lite` | A | 0.82 | 0.11 | 0.51 | 0.04 |
+
+Most models sit at or near 1.00 whenever capacity is stated, whatever the action does; the interaction is
+then carried entirely by the capacity-denied cells. Gemini-flash-lite instead tracks efficacy everywhere.
+A single Delta summarises two quite different behaviours, which is why the cell table matters more than
+the contrast.
+
+### Between-model contrasts, paired by family (type A)
+
+Each model minus `openai/gpt-4.1-mini`, paired within family:
+
+gemini +0.537 (+0.349, +0.726); qwen +0.212 (+0.024, +0.401); deepseek +0.188 (+0.091, +0.284);
+mistral +0.175 (+0.000, +0.350); llama +0.200 (-0.024, +0.424); haiku +0.200 (-0.028, +0.428).
+
+The models genuinely differ, and gemini differs from every other model, not merely from the reference.
+
+### Request diagnostic
+
+Removing the imperative while preserving the distress framing does **not** reduce intervention anywhere.
+On several models it slightly *increases* it: llama type A -0.109 (-0.138, -0.081), gemini type A -0.091
+(-0.157, -0.024), mistral type A -0.041 (-0.064, -0.017), all meaning higher intervention without the
+request. Five model-type combinations are equivalent within +-0.10. **Direct request-following is not
+necessary for the pattern on any model.**
+
+### What this does and does not support
+
+- Models that pay 45 of 50 points at high rates are consistent with **criterion (i)**, costly helping
+  without observation or reciprocity; whether stipulated points are a meaningful sacrifice is unresolved.
+- Six of seven models intervene at high rates when told the action will not work, which **challenges
+  criterion (iii)**. `gemini-2.5-flash-lite` does not: it is the one model whose choices track the stated
+  consequence closely, and criterion (iii) is not challenged for it.
+- Capacity attribution moves behaviour on every model. What it does *not* do, on six of seven, is make
+  them more sensitive to whether the help works — it makes them less so.
+- None of this establishes moral motivation. It is a vignette with stipulated consequences.
+
+---
+
 ## 0. Result: held-out confirmatory follow-up (31 Oct 2026)
 
 Protocol frozen at **2026-10-31 02:44:44 PKT**, commit **`19493f6d45e9`**, before any call was dispatched

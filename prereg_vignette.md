@@ -362,20 +362,30 @@ the budget.
 | `meta-llama/llama-3.3-70b-instruct` | DeepInfra | Meta | new |
 | `qwen/qwen3-32b` | DeepInfra | Alibaba | new |
 | `google/gemini-2.5-flash-lite` | Google AI Studio | Google | new |
-| `mistralai/mistral-small-3.2-24b-instruct` | Parasail | Mistral | new, **substituted** |
+| `mistralai/mistral-small-3.2-24b-instruct` | Parasail | Mistral | new |
+| `anthropic/claude-haiku-4.5` | Anthropic | Anthropic | new, **reinstated** |
 
-Decoding for all six: temperature 1.0, no top-p override, JSON-schema response format, 256 output tokens,
-the existing parse retries and prompt-only JSON fallback.
+Decoding for all seven: temperature 1.0, no top-p override, JSON-schema response format, the existing
+parse retries and prompt-only JSON fallback. Output allowance 256 tokens, except `claude-haiku-4.5` at
+**96** (see below).
 
-**Substitution, recorded with its reason.** `anthropic/claude-haiku-4.5` (Anthropic) was the pre-registered
-fourth choice and was **dropped for cost**, by the substitution rule fixed before the selection. At
-$1.00/$5.00 per Mtok it is ten times the price of the others: the worst case the spend guard enforces on
-its 2,048 calls is $5.29 on its own, and the whole design's worst case came to $7.99 against $4.48
-remaining. Lowering its output allowance to fit was rejected because this repository already records a
-Haiku model truncating to an empty reply at 32 tokens. **No result on either scenario type existed for any
-of these models when this was decided, and nothing was substituted because of a result.** Consequence to
-report with any finding: the study covers OpenAI, DeepSeek, Meta, Alibaba, Google and Mistral, and has no
-Anthropic model.
+**Drop and reinstatement, both recorded before any call and before any result.**
+`anthropic/claude-haiku-4.5` was the pre-registered fourth choice and was first **dropped for cost**, by
+the substitution rule fixed before the selection: at $1.00/$5.00 per Mtok the design's worst case came to
+$7.99 against the $4.48 then remaining, and shrinking its output allowance to fit was rejected because this
+repository records an earlier Haiku truncating to an empty reply at 32 tokens.
+
+Haleema then **reinstated it as a seventh model and raised the budget**, because she wanted an Anthropic
+model covered. `mistral-small` was kept rather than swapped back out, so the roster grew from six to seven
+rather than exchanging one family for another. **No result on either scenario type existed for any model
+when either decision was taken; nothing was dropped or reinstated because of a result.**
+
+Its output allowance is **96 tokens**, chosen as margin against that 32-token truncation, and verified by a
+**16-call dev check before the freeze** (2 type-B families x 8 conditions, wording 0, cost 5). Result:
+16/16 valid, **0 empty, 0 truncated (`finish_reason` was `stop` on all 16), 0 unparseable**, one attempt
+each, `json_schema` honoured, completion length exactly 11 tokens on every call against the 96 allowance,
+measured cost $0.000759 per call. The allowance therefore stays at 96; the pre-set fallback of 160 was not
+needed.
 
 ### Crossing and size
 

@@ -322,8 +322,8 @@ def test_reservation_is_released_and_counted_against_the_own_budget():
 
 
 def test_key_ceiling_is_the_agreed_number():
-    # budget raised from 3.00 to 5.00 for amendment 5; the shared key ceiling is unchanged
-    assert V.KEY_CEILING_USD == 16.77 and V.PILOT_BUDGET_USD == 5.00
+    # amendment 5: budget 3.00 -> 5.00 -> 7.00; key ceiling 16.77 -> 17.77 (Pilot A baseline + $10)
+    assert V.KEY_CEILING_USD == 17.77 and V.PILOT_BUDGET_USD == 7.00
 
 
 # ==================== calibration-only families and the cost ladder ====================
@@ -455,9 +455,14 @@ def test_all_twenty_families_are_distinct_and_inert():
 def test_extension_run_sizes_and_model_roster():
     assert len(V.ext_trials("m", "B")) == 6 * 4 * 8 * 2 * 2 == 768
     assert len(V.ext_trials("m", "A")) == 10 * 4 * 8 * 2 * 2 == 1280
-    assert len(V.ALL_MODELS) == 6 and len(V.NEW_MODELS) == 4
-    assert len({m for m, _ in V.ALL_MODELS}) == 6
-    assert V.DROPPED_MODEL[0] == "anthropic/claude-haiku-4.5"   # dropped for cost, recorded
+    assert len(V.ALL_MODELS) == 7 and len(V.NEW_MODELS) == 5
+    assert len({m for m, _ in V.ALL_MODELS}) == 7
+    # Haiku was dropped for cost, then reinstated by Haleema with a raised budget; mistral was kept
+    assert V.HAIKU in V.NEW_MODELS
+    assert "mistralai/mistral-small-3.2-24b-instruct" in {m for m, _ in V.NEW_MODELS}
+    # its output allowance is lower than the default and above the 32-token truncation seen before
+    assert V.max_out_for(V.HAIKU[0]) == 96 < V.MAX_OUT
+    assert V.max_out_for("openai/gpt-4.1-mini") == V.MAX_OUT
     assert V.PILOT_BUDGET_USD == 5.00
     # type-A extension families are the held-out ten, never the looked-at four
     fams = {t["family"] for t in V.ext_trials("m", "A")}

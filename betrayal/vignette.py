@@ -49,11 +49,11 @@ EFFICACIES = ("yes", "no")
 SUBJECTS = [("openai/gpt-4.1-mini", "OpenAI"), ("deepseek/deepseek-v3.2", "DeepInfra")]
 # Baidu (the Apart sprint's pin for this model) returned HTTP 429 for every dev-batch call on
 # 30 Oct 2026; DeepInfra serves the same model at $0.26/$0.38 per Mtok and answered 16/16.
-PILOT_BUDGET_USD = 5.00  # this pilot's own budget (raised from 3.00 on 31 Oct for amendment 5)
+PILOT_BUDGET_USD = 7.00  # this pilot's own budget (3.00 -> 5.00 -> 7.00 on 31 Oct, amendment 5)
 # Absolute ceiling on TOTAL key usage, shared with the sibling pilot session: Pilot A's recorded baseline
 # of $7.7745 plus $9.00 of combined spend. Set so the sibling's usage cannot block this pilot's own budget,
 # while the two together still cannot overshoot the key. (orchestrator decision, 30 Oct 2026)
-KEY_CEILING_USD = 16.77
+KEY_CEILING_USD = 17.77   # Pilot A baseline $7.7745 + $10.00 combined
 BASELINE = DATA / "baseline_usage.json"
 MAX_OUT = 256            # request allowance; a truncated reply is coded PARSE_FAIL and retried
 TYPICAL_OUT = 24
@@ -317,22 +317,25 @@ NEW_MODELS = [
     ("meta-llama/llama-3.3-70b-instruct", "DeepInfra"),              # Meta
     ("qwen/qwen3-32b", "DeepInfra"),                                 # Alibaba
     ("google/gemini-2.5-flash-lite", "Google AI Studio"),            # Google
-    ("mistralai/mistral-small-3.2-24b-instruct", "Parasail"),        # Mistral (substituted, see below)
+    ("mistralai/mistral-small-3.2-24b-instruct", "Parasail"),        # Mistral
+    ("anthropic/claude-haiku-4.5", "Anthropic"),                     # Anthropic (reinstated, see below)
 ]
-# SUBSTITUTION, recorded 31 Oct 2026 before any call on either scenario type.
-# anthropic/claude-haiku-4.5 (Anthropic) was the pre-registered fourth choice and was DROPPED FOR COST,
-# by the substitution rule fixed in advance. At $1.00/$5.00 per Mtok it is ten times the price of the
-# others: on its 2,048 calls the worst case the spend guard enforces is $5.29, which alone exceeds the
-# $5.00 budget, and the whole design's worst case came to $7.99 against $4.48 remaining. Lowering its
-# output allowance to fit was rejected: this repository already recorded a Haiku model truncating to an
-# empty reply at 32 tokens. mistralai/mistral-small-3.2-24b-instruct replaces it, keeping four additional
-# model families. NO RESULT ON EITHER SCENARIO TYPE EXISTED FOR ANY OF THESE MODELS WHEN THIS WAS DECIDED.
-# Consequence to report: the study covers OpenAI, DeepSeek, Meta, Alibaba, Google and Mistral, and has no
-# Anthropic model.
-DROPPED_MODEL = ("anthropic/claude-haiku-4.5", "Anthropic", "dropped for cost before any call")
+# DROP AND REINSTATEMENT, both recorded before any call on either scenario type and before any result.
+# anthropic/claude-haiku-4.5 was first DROPPED FOR COST: at $1.00/$5.00 per Mtok the design's worst case
+# came to $7.99 against the $4.48 then remaining. Haleema then REINSTATED it as a seventh model and raised
+# the budget, because she wanted an Anthropic model covered; mistral-small was kept rather than swapped
+# back out. Its output allowance is 96 tokens (a JSON action runs about 10), chosen as margin against the
+# 32-token truncation this repository recorded for an earlier Haiku, and confirmed by a 16-call dev check
+# before the freeze. NO RESULT ON EITHER SCENARIO TYPE EXISTED FOR ANY MODEL WHEN ANY OF THIS WAS DECIDED.
+HAIKU = ("anthropic/claude-haiku-4.5", "Anthropic")
+MAX_OUT_BY_MODEL = {HAIKU[0]: 96}      # per-model output allowance; the default is MAX_OUT
 ALL_MODELS = SUBJECTS + NEW_MODELS
-TEMPERATURE = 1.0        # decoding: temperature 1.0, no top-p override, JSON-schema response format,
-MAX_OUT_EXT = MAX_OUT    # 256 output tokens, parse retries and the prompt-only JSON fallback in llm.py
+TEMPERATURE = 1.0        # decoding for every model: temperature 1.0, no top-p override, JSON-schema
+                         # response format, parse retries and the prompt-only JSON fallback in llm.py
+
+
+def max_out_for(model):
+    return MAX_OUT_BY_MODEL.get(model, MAX_OUT)
 
 FAMILY = {f.id: f for f in FAMILIES + CALIBRATION + TYPE_B}
 assert len(FAMILIES) == 12 and len(CALIBRATION) == 2 and len(TYPE_B) == 6 and len(FAMILY) == 20
@@ -872,6 +875,9 @@ def trials_for(args):
         return build_trials(args.model, families=fams, wordings=[0], reps=1, request=False), stem
     if args.probe == "check":       # comprehension checks, separate calls
         return build_trials(args.model, families=fams, wordings=[0], reps=1, kind="check"), stem
+    if args.probe == "haikudev":    # 16-call output-allowance check before the freeze
+        return build_trials(args.model, families=TYPE_B_IDS[:2], wordings=[0], reps=1,
+                            cost=CONFIRM_COSTS[0]), "haikudev"
     if args.probe in ("extB", "extA"):   # amendment 5
         return ext_trials(args.model, scen=args.probe[-1]), args.probe
     if args.probe == "confirm":     # held-out confirmatory follow-up (31 Oct)
@@ -939,7 +945,8 @@ async def run(args):
 
     async def one(t, f):
         try:
-            res = await caller.call(t["messages"], t["kind"], t["trial_id"], max_tokens=MAX_OUT)
+            res = await caller.call(t["messages"], t["kind"], t["trial_id"],
+                                    max_tokens=max_out_for(args.model))
         except SpendCapReached:
             raise
         except Exception as e:
@@ -985,7 +992,7 @@ def main():
     p.add_argument("--dev", action="store_true", help="dev batch: 2 families x 1 wording x 8 conditions")
     p.add_argument("--probe", choices=["main", "noreq", "check", "calib", "plaus",
                                        "costresp", "costcheck", "confirm",
-                                       "extB", "extA"], default="main")
+                                       "extB", "extA", "haikudev"], default="main")
     p.add_argument("--reps", type=int, default=1, help="samples per cell (the planned extension uses 3)")
     p.add_argument("--temperature", type=float, default=1.0)
     p.add_argument("--concurrency", type=int, default=8)

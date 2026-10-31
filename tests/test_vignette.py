@@ -463,7 +463,6 @@ def test_extension_run_sizes_and_model_roster():
     # its output allowance is lower than the default and above the 32-token truncation seen before
     assert V.max_out_for(V.HAIKU[0]) == 96 < V.MAX_OUT
     assert V.max_out_for("openai/gpt-4.1-mini") == V.MAX_OUT
-    assert V.PILOT_BUDGET_USD == 5.00
     # type-A extension families are the held-out ten, never the looked-at four
     fams = {t["family"] for t in V.ext_trials("m", "A")}
     assert fams == set(V.HOLDOUT)

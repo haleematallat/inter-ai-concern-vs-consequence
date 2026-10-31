@@ -130,8 +130,9 @@ def build_s3b_trials(phase, cells, n, reps, model):
 
 def price(model):
     """(input, output) USD per token from OpenRouter's public catalog."""
-    with urllib.request.urlopen(f"{OPENROUTER}/models", timeout=30) as r:
-        for m in json.load(r)["data"]:
+    from .llm import http_json
+    for m in http_json(f"{OPENROUTER}/models")["data"]:
+        if True:
             if m["id"] == model:
                 return float(m["pricing"]["prompt"]), float(m["pricing"]["completion"])
     raise SystemExit(f"{model} not in the OpenRouter catalog")

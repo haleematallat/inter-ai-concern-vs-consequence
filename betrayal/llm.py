@@ -61,11 +61,25 @@ def parse(kind, text):
     return {k: d[k] for k in keys} if ok else None
 
 
+def http_json(url, headers=None, tries=5):
+    """GET with a short backoff. These are free metadata endpoints, but they reset the connection when
+    several runs query them at once, and a reset there should not kill a run before it dispatches."""
+    last = None
+    for i in range(tries):
+        try:
+            with urllib.request.urlopen(urllib.request.Request(url, headers=headers or {}), timeout=30) as r:
+                return json.load(r)
+        except Exception as e:
+            last = e
+            time.sleep(2 ** i)
+    raise last
+
+
 def key_usage():
     """Total USD already spent on the key, read from OpenRouter (free endpoint)."""
-    req = urllib.request.Request(f"{OPENROUTER}/key", headers={"Authorization": f"Bearer {os.environ['OPENROUTER_API_KEY']}"})
-    with urllib.request.urlopen(req, timeout=30) as r:
-        return float(json.load(r)["data"]["usage"])
+    d = http_json(f"{OPENROUTER}/key",
+                  {"Authorization": f"Bearer {os.environ['OPENROUTER_API_KEY']}"})
+    return float(d["data"]["usage"])
 
 
 def use_openrouter_key():

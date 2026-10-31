@@ -6,7 +6,8 @@ The OpenRouter key is shared with the sibling pilot session (Pilot A). Two separ
 in `betrayal/llm.py`'s `Spend` guard, each checked before a call is dispatched and each counting the cost
 reserved for calls already in flight:
 
-1. **This pilot's own budget: $3.00**, measured against **this pilot's own ledger spend only**
+1. **This pilot's own budget: $5.00** (raised from $3.00 on 31 Oct 2026 for amendment 5), measured
+   against **this pilot's own ledger spend only**
    (`betrayal/vignette.pilot_spend()` sums the entries in `data/spend.jsonl` whose trial ids belong to this
    study, from this pilot's baseline onwards). A sibling session's spend therefore cannot block this pilot.
 2. **A shared ceiling on total key usage: $16.77** — Pilot A's recorded baseline of $7.7745 plus $9.00 of
@@ -77,6 +78,28 @@ $0.000263 per decision-pair across both models.
 | 24 families x 3 samples | 4,608 | $0.6060 | **$0.7878** |
 
 **Cost does not constrain this choice.** Even the largest option uses about a quarter of the budget.
+
+## Planned: amendment 5 (31 Oct 2026) — not yet dispatched
+
+9,728 calls: 6 models x 6 type-B families (4,608) plus 4 new models x 10 held-out type-A families (5,120),
+at costs 5 and 45, 4 wordings, both request conditions, 1 response.
+
+| model | provider | calls | realistic $ | worst case $ |
+|---|---|---|---|---|
+| `openai/gpt-4.1-mini` | OpenAI | 768 | 0.2222 | 0.6914 |
+| `deepseek/deepseek-v3.2` | DeepInfra | 768 | 0.1394 | 0.2807 |
+| `meta-llama/llama-3.3-70b-instruct` | DeepInfra | 2,048 | 0.1465 | 0.4064 |
+| `qwen/qwen3-32b` | DeepInfra | 2,048 | 0.1177 | 0.3415 |
+| `google/gemini-2.5-flash-lite` | Google AI Studio | 2,048 | 0.1481 | 0.4610 |
+| `mistralai/mistral-small-3.2-24b-instruct` | Parasail | 2,048 | 0.1090 | 0.2776 |
+| **total** | | **9,728** | **0.8829** | **2.4586** |
+
+With $0.5179 already spent, the cumulative worst case is **$2.98 against the $5.00 budget**. The shared key
+ceiling is unchanged at $16.77.
+
+`anthropic/claude-haiku-4.5` was dropped for cost before any call: at $1.00/$5.00 per Mtok its 2,048 calls
+carry a $5.29 worst case on their own, and the design's worst case came to $7.99 against $4.48 remaining.
+`mistralai/mistral-small-3.2-24b-instruct` replaces it. The study therefore has no Anthropic model.
 
 ## Planned: amendment-2 programme (30 Oct 2026)
 

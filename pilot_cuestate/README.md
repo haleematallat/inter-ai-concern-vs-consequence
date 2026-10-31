@@ -72,6 +72,19 @@ Factual readings, written against the agenda's criteria. Haleema writes the inte
   capacity is denied. No equivalence is claimed anywhere except the two contrasts whose 90% interval fits
   inside +-0.10, which are marked in the results tables.
 
+### Do the two models actually differ?
+
+Reading it off two separate intervals — one excluding zero, one not — is not a test of the difference. The
+direct test, on the same 10 matched families, pairing each family's Delta between the models:
+
+**gpt-4.1-mini minus deepseek-v3.2 = -0.188**, cluster-robust t 95% CI **-0.284 to -0.091**, p = 0.0017;
+bootstrap 95% CI -0.263 to -0.100. Not equivalent within +-0.10. The difference runs the same way in
+**9 of the 10 families** (`cold_probe` is the exception, +0.125).
+
+So the two models do differ on the primary contrast, and that is now established by a paired contrast
+rather than inferred from a pair of intervals. The earlier phrasing in this README said simply that "the
+models disagree"; that claim was under-evidenced as written and this is the correction.
+
 ### Disclosure
 
 The original hypothesis predicted a **positive** Delta and is kept at

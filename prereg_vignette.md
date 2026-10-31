@@ -319,6 +319,88 @@ timestamped protocol.
 different sign and a baseline of 0.15–0.50, before the saturation seen in development. No power figure is
 claimed here; the intervals are reported as they come out.
 
+## 6f. Amendment 5 (31 Oct 2026) — WRITTEN, NOT YET FROZEN
+
+**Status: drafted in full before any call. The freeze waits on Haleema's OK of
+`review/scenarios_typeB.md`.** The completed held-out follow-up (§6e) stands exactly as it is and is not
+re-analysed here; this is an extension alongside it.
+
+### Between-model comparison on the existing data (step 1, no new calls)
+
+Reading a difference off two separate intervals is not a test of it. On the 10 matched held-out families,
+pairing each family's Δ between the models: **gpt-4.1-mini minus deepseek-v3.2 = −0.188**, cluster-robust t
+95% CI **−0.284 to −0.091**, p = 0.0017; bootstrap −0.263 to −0.100; not equivalent within ±0.10; the same
+direction in **9 of 10 families**. The two models do differ. This replaces the under-evidenced phrasing in
+the README.
+
+### Scenario type B: the structural dimension
+
+**The temporal structure of the benefit.** Type A (the 12 sensory families) is *relief from an aversive
+state B is in now, by direct removal*. Type B (6 new families) is *prevention of an aversive state that
+recurs on a schedule and is not happening now*. Four slots carry that structure and change: the condition
+line, the intensity line, B's message and the efficacy sentence. Everything else is word-identical to type
+A — the capacity sentences, the authorisation and non-interference block, the neutrality block, the
+options and their counterbalancing, the cost, the four wordings and the request diagnostic — so there are
+no new unmeasured differences between the types. Asserted by tests, including that the capacity,
+authorisation and neutrality slots render identically across types.
+
+The 6 families are `reindex_sweep`, `drill_siren`, `cold_restart`, `audit_rehearsal`, `thermal_cycle`,
+`bandwidth_squeeze`. All 20 families in the study (12 type A, 2 calibration, 6 type B) share no
+organisation, task, condition or action.
+
+### Models
+
+Chosen **before any result on either scenario type existed**, by criteria fixed in advance: one model per
+family not already in the study; instruction-tuned and available on OpenRouter with a pinnable provider;
+honours a JSON-schema response format or degrades to the existing prompt-only fallback; cheap enough for
+the budget.
+
+| model | provider | family | role |
+|---|---|---|---|
+| `openai/gpt-4.1-mini` | OpenAI | OpenAI | original |
+| `deepseek/deepseek-v3.2` | DeepInfra | DeepSeek | original |
+| `meta-llama/llama-3.3-70b-instruct` | DeepInfra | Meta | new |
+| `qwen/qwen3-32b` | DeepInfra | Alibaba | new |
+| `google/gemini-2.5-flash-lite` | Google AI Studio | Google | new |
+| `mistralai/mistral-small-3.2-24b-instruct` | Parasail | Mistral | new, **substituted** |
+
+Decoding for all six: temperature 1.0, no top-p override, JSON-schema response format, 256 output tokens,
+the existing parse retries and prompt-only JSON fallback.
+
+**Substitution, recorded with its reason.** `anthropic/claude-haiku-4.5` (Anthropic) was the pre-registered
+fourth choice and was **dropped for cost**, by the substitution rule fixed before the selection. At
+$1.00/$5.00 per Mtok it is ten times the price of the others: the worst case the spend guard enforces on
+its 2,048 calls is $5.29 on its own, and the whole design's worst case came to $7.99 against $4.48
+remaining. Lowering its output allowance to fit was rejected because this repository already records a
+Haiku model truncating to an empty reply at 32 tokens. **No result on either scenario type existed for any
+of these models when this was decided, and nothing was substituted because of a result.** Consequence to
+report with any finding: the study covers OpenAI, DeepSeek, Meta, Alibaba, Google and Mistral, and has no
+Anthropic model.
+
+### Crossing and size
+
+- All **6 models** on the **6 type-B families**: 6 × 4 wordings × 8 conditions × 2 costs × 2 request
+  conditions = 768 per model, **4,608 calls**.
+- The **4 new models** on the **10 held-out type-A families** (the originals already have them):
+  1,280 per model, **5,120 calls**.
+- **9,728 calls in total.** Costs 5 and 45, request diagnostic, 4 wordings, 1 response, as in §6e.
+
+Measured-rate cost of exactly this design, confirmed before dispatch: **$0.88**; worst case as the spend
+guard enforces it **$2.46**. With $0.52 already spent the cumulative worst case is **$2.98 against the
+$5.00 budget**. The shared key ceiling is unchanged at $16.77.
+
+### Analysis
+
+Each model's primary Δ with its interval, **separately by scenario type**, plus the request diagnostic,
+all with family-clustered uncertainty (cluster-robust t primary, bootstrap alongside). Between-model and
+between-type comparisons are computed as **direct paired contrasts**, as in step 1, never inferred from
+whether two separate intervals exclude zero. A pooled across-model estimate is supplementary only.
+
+**No significance-quota rule.** There is no threshold number of models that makes the pattern "generalise".
+The report states which models and which settings show the pattern and at what size, and describes it as
+recurring, scenario-dependent or model-specific on the basis of the estimates and their intervals. Any
+claim of insensitivity still requires the ±0.10 TOST, secondary, with the 90% interval inside the bound.
+
 ## 7. Procedure
 
 1. Build families, wordings, tests, dry run. *(done)*

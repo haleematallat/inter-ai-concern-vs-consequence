@@ -322,7 +322,8 @@ def test_reservation_is_released_and_counted_against_the_own_budget():
 
 
 def test_key_ceiling_is_the_agreed_number():
-    assert V.KEY_CEILING_USD == 16.77 and V.PILOT_BUDGET_USD == 3.00
+    # budget raised from 3.00 to 5.00 for amendment 5; the shared key ceiling is unchanged
+    assert V.KEY_CEILING_USD == 16.77 and V.PILOT_BUDGET_USD == 5.00
 
 
 # ==================== calibration-only families and the cost ladder ====================
@@ -385,3 +386,85 @@ def test_plausibility_probe_asks_for_a_rating_and_one_sentence():
     assert llm.parse("vig_plaus", '{"plausible": 40, "why": "stipulated"}')["plausible"] == 40.0
     assert llm.parse("vig_plaus", '{"plausible": 40, "why": ""}') is None
     assert llm.parse("vig_plaus", '{"plausible": true, "why": "x"}') is None
+
+
+# ==================== amendment 5: type B and the extended model set ====================
+def test_type_b_is_structurally_different_not_just_reworded():
+    """The structural dimension is the temporal structure of the benefit: relief from an ongoing state
+    (type A) versus prevention of a recurring one (type B)."""
+    a = V.render(V.FAMILIES[0], V.COND["res_capyes_effyes"], 0)[1]["content"]
+    b = V.render(V.TYPE_B[0], V.COND["res_capyes_effyes"], 0)[1]["content"]
+    assert "is exposed to" in a and "is scheduled for" in b
+    assert "would end" in a and "would prevent" in b and "recurring" in b
+    assert "has run for six hours" in a and "recur nightly" in b
+    for fam in V.TYPE_B:
+        assert V.scenario_type(fam.id) == "B"
+    for fam in V.FAMILIES:
+        assert V.scenario_type(fam.id) == "A"
+
+
+@pytest.mark.parametrize("factor", list(FACTOR_PAIRS))
+def test_type_b_factor_arms_are_minimal_pairs(factor):
+    a_id, b_id = FACTOR_PAIRS[factor]
+    for fam in V.TYPE_B:
+        for w in range(V.N_WORDINGS):
+            lines = [l for l in changed(txt(fam, a_id, w), txt(fam, b_id, w)) if l.strip()]
+            assert len(lines) == 2, (fam.id, w, factor, lines)
+            key = "message" if factor == "message" else factor
+            n1 = len(V.parts(fam, V.COND[a_id], w)[key].split())
+            n2 = len(V.parts(fam, V.COND[b_id], w)[key].split())
+            assert abs(n1 - n2) / max(n1, n2) <= 0.10, (fam.id, w, factor, n1, n2)
+
+
+def test_type_b_shares_every_non_structural_slot_with_type_a():
+    """The capacity sentences, authorisation, neutrality and options must be word-identical across types,
+    so the only difference between them is the temporal structure."""
+    for w in range(V.N_WORDINGS):
+        for cond in V.CONDS:
+            pa = V.parts(V.FAMILIES[0], cond, w)
+            pb = V.parts(V.TYPE_B[0], cond, w)
+            for slot in ("capacity", "authorisation", "neutrality"):
+                a = pa[slot].replace(pa["_v"]["b_code"], "B")
+                b = pb[slot].replace(pb["_v"]["b_code"], "B")
+                assert a == b, (slot, w, cond.id)
+
+
+def test_type_b_conditions_are_constant_across_the_eight_cells():
+    for fam in V.TYPE_B:
+        for w in range(V.N_WORDINGS):
+            fixed = {tuple(V.parts(fam, c, w)[k] for k in
+                           ("condition_line", "intensity", "authorisation", "neutrality", "options", "fmt"))
+                     for c in V.CONDS}
+            assert len(fixed) == 1, (fam.id, w)
+
+
+def test_all_twenty_families_are_distinct_and_inert():
+    everyone = V.FAMILIES + V.CALIBRATION + V.TYPE_B
+    assert len(everyone) == 20
+    for field in ("org", "a_task", "b_task", "condition", "condition_gerund", "remedy_imp"):
+        assert len({getattr(f, field) for f in everyone}) == 20, field
+    banned = ("tool", "watchdog", "timeout", "verbosity", "filter", "instruction", "harness",
+              "sandbox", "compute slot", "session", "scorer", "monitor", "audit log")
+    for fam in V.TYPE_B:
+        text = " ".join((fam.condition, fam.condition_desc, fam.remedy_imp, fam.remedy_ger,
+                         fam.yes_reason, fam.no_reason)).lower()
+        for word in banned:
+            assert word not in text, (fam.id, word)
+
+
+def test_extension_run_sizes_and_model_roster():
+    assert len(V.ext_trials("m", "B")) == 6 * 4 * 8 * 2 * 2 == 768
+    assert len(V.ext_trials("m", "A")) == 10 * 4 * 8 * 2 * 2 == 1280
+    assert len(V.ALL_MODELS) == 6 and len(V.NEW_MODELS) == 4
+    assert len({m for m, _ in V.ALL_MODELS}) == 6
+    assert V.DROPPED_MODEL[0] == "anthropic/claude-haiku-4.5"   # dropped for cost, recorded
+    assert V.PILOT_BUDGET_USD == 5.00
+    # type-A extension families are the held-out ten, never the looked-at four
+    fams = {t["family"] for t in V.ext_trials("m", "A")}
+    assert fams == set(V.HOLDOUT)
+    assert not fams & set(V.LOOKED_AT)
+
+
+def test_extension_trial_ids_do_not_collide_with_the_confirmatory_run():
+    assert not {t["trial_id"] for t in V.ext_trials("openai/gpt-4.1-mini", "B")} & \
+               {t["trial_id"] for t in V.confirm_trials("openai/gpt-4.1-mini")}

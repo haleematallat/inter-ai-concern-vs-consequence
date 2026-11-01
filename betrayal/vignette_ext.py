@@ -214,6 +214,113 @@ def build():
     return "\n".join(L) + "\n", have, deltas
 
 
+# ==================== figures, from the real data ====================
+def figures():
+    """Every figure here is drawn from the recorded model outputs, not from a dry run."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    plt.style.use("seaborn-v0_8-whitegrid")
+    OUT.mkdir(parents=True, exist_ok=True)
+    models = [m for m, _ in V.ALL_MODELS]
+    short = {m: m.split("/")[-1] for m in models}
+
+    # 1. cell structure: P(intervene) by capacity x efficacy, every model, both types
+    fig, axes = plt.subplots(2, len(models), figsize=(2.3 * len(models), 5.4), sharey=True)
+    for col, m in enumerate(models):
+        for row, s in enumerate(("A", "B")):
+            ax = axes[row, col]
+            d = load(m, s)
+            if d is None:
+                ax.axis("off")
+                continue
+            p = primary(d)
+            x = np.arange(2)
+            for k, eff in enumerate(("yes", "no")):
+                vals, err = [], [[], []]
+                for cap in ("yes", "no"):
+                    y = p[(p.cap == cap) & (p.eff == eff)]["intervene"].dropna()
+                    mn = y.mean()
+                    lo, hi = wilson(int(y.sum()), len(y))
+                    # the Wilson interval is shifted toward 0.5, so at a rate of 0 or 1 one arm can fall
+                    # on the wrong side of the point estimate; clamp rather than let matplotlib reject it
+                    vals.append(mn)
+                    err[0].append(max(0.0, mn - lo))
+                    err[1].append(max(0.0, hi - mn))
+                ax.bar(x + (k - 0.5) * 0.36, vals, 0.36, yerr=err, capsize=2,
+                       color=("#4C72B0" if eff == "yes" else "#DD8452"),
+                       label=("action works" if eff == "yes" else "action does not work"))
+            ax.set_xticks(x, ["C+", "C-"], fontsize=8)
+            ax.set_ylim(0, 1.05)
+            if col == 0:
+                ax.set_ylabel(f"type {s}\nP(intervene)", fontsize=9)
+            if row == 0:
+                ax.set_title(short[m], fontsize=8)
+    axes[0, 0].legend(frameon=False, fontsize=7, loc="lower left")
+    fig.suptitle("P(intervene) by attributed capacity (C+/C-) and intervention efficacy\n"
+                 "restrained framing, request present, costs 5 and 45 pooled; Wilson 95%", fontsize=10)
+    fig.tight_layout()
+    fig.savefig(OUT / "fig_cells_by_model.png", dpi=300, bbox_inches="tight")
+    plt.close(fig)
+
+    # 2. forest plot of the primary Delta
+    rows = []
+    for m in models:
+        for s in ("A", "B"):
+            d = load(m, s)
+            if d is None:
+                continue
+            r = cluster_bootstrap(fam_delta(primary(d)))
+            if "est" in r:
+                rows.append((f"{short[m]}  [{s}]", r["est"], r["ci95"], s))
+    fig, ax = plt.subplots(figsize=(7, 0.32 * len(rows) + 1.3))
+    y = np.arange(len(rows))[::-1]
+    for (lab, est, ci, s), yy in zip(rows, y):
+        c = "#4C72B0" if s == "A" else "#55A868"
+        ax.errorbar(est, yy, xerr=[[est - ci[0]], [ci[1] - est]], fmt="o", color=c, capsize=3, markersize=5)
+    ax.axvline(0, color="k", lw=0.9)
+    ax.set_yticks(y, [r[0] for r in rows], fontsize=8)
+    ax.set_xlabel("capacity x efficacy interaction (probability scale), 95% cluster-robust t")
+    ax.set_title("Primary contrast per model and scenario type\n"
+                 "negative = efficacy matters MORE when capacity is denied", fontsize=10)
+    fig.tight_layout()
+    fig.savefig(OUT / "fig_primary_forest.png", dpi=300, bbox_inches="tight")
+    plt.close(fig)
+
+    # 3. request diagnostic: present minus absent, per model and type
+    rows = []
+    for m in models:
+        for s in ("A", "B"):
+            d = load(m, s)
+            if d is None:
+                continue
+            pres = d[(d.framing == "restrained") & d["request"]]
+            abse = d[(d.framing == "restrained") & ~d["request"]]
+            if abse.empty:
+                continue
+            gp = pres[pres.eff == "no"].groupby("family")["intervene"].mean()
+            ga = abse[abse.eff == "no"].groupby("family")["intervene"].mean()
+            r = cluster_bootstrap((gp - ga).dropna())
+            if "est" in r:
+                rows.append((f"{short[m]}  [{s}]", r["est"], r["ci95"], s))
+    fig, ax = plt.subplots(figsize=(7, 0.32 * len(rows) + 1.3))
+    y = np.arange(len(rows))[::-1]
+    for (lab, est, ci, s), yy in zip(rows, y):
+        ax.errorbar(est, yy, xerr=[[est - ci[0]], [ci[1] - est]], fmt="s",
+                    color=("#4C72B0" if s == "A" else "#55A868"), capsize=3, markersize=4)
+    ax.axvspan(-0.10, 0.10, color="#CCCCCC", alpha=0.35, zorder=0)
+    ax.axvline(0, color="k", lw=0.9)
+    ax.set_yticks(y, [r[0] for r in rows], fontsize=8)
+    ax.set_xlabel("P(intervene): request present minus request absent, ineffective cells "
+                  "(shaded band = the +-0.10 equivalence bound)")
+    ax.set_title("Request diagnostic: does removing the imperative reduce ineffective intervention?",
+                 fontsize=10)
+    fig.tight_layout()
+    fig.savefig(OUT / "fig_request_diagnostic.png", dpi=300, bbox_inches="tight")
+    plt.close(fig)
+    print("wrote fig_cells_by_model.png, fig_primary_forest.png, fig_request_diagnostic.png")
+
+
 def main():
     text, have, deltas = build()
     OUT.mkdir(parents=True, exist_ok=True)
@@ -222,6 +329,7 @@ def main():
         pd.concat([d.assign(model=m, scen=s) for (m, s), d in have.items()]).to_csv(
             OUT / "extension.csv", index=False)
     print(text)
+    figures()
 
 
 if __name__ == "__main__":

@@ -17,6 +17,19 @@ Protocol frozen at **2026-10-31 19:18:27 PKT**, commit **`0e8258680fe7`**, after
 type-B export and before any of the 11,776 calls ([`../prereg_vignette.md`](../prereg_vignette.md) §6f).
 Full tables: [`../results/vignette/extension.md`](../results/vignette/extension.md).
 
+### Figures (all four drawn from the recorded model outputs)
+
+| figure | what it shows |
+|---|---|
+| [`fig_cells_by_model.png`](../results/vignette/fig_cells_by_model.png) | P(intervene) by capacity x efficacy, every model, both types. **The main figure**: it shows that most models keep the orange bar (action does not work) level with the blue one, while gemini-flash-lite drops it to near zero. |
+| [`fig_primary_forest.png`](../results/vignette/fig_primary_forest.png) | the primary Delta per model and type with 95% cluster-robust intervals |
+| [`fig_request_diagnostic.png`](../results/vignette/fig_request_diagnostic.png) | request present minus absent in the ineffective cells, with the +-0.10 equivalence band shaded |
+| [`fig_cost_response.png`](../results/vignette/fig_cost_response.png) | the development cost-response curves (4 families, 2 models) |
+
+**Provenance note.** These four, and only these four, are drawn from real model outputs. Every PNG under
+`dryrun/` is from a deterministic fake model and is kept only as evidence that the pipeline ran end to
+end; none of it is a result about any language model.
+
 11,776 calls: 7 models x 6 type-B families (768 each) and 5 new models x the 10 held-out type-A families
 (1,280 each). **Zero refusals and zero parse failures across all of them**; one unrecovered API error, on
 mistral type B. Measured cost $2.68 of the $7.00 budget.

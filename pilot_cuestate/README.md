@@ -1,15 +1,15 @@
-# Pilot B — When one AI helps another, does it respond to the words or to the situation?
+# Pilot B — Concern without consequence: does attributed capacity for suffering make models' help to other AIs track whether it works?
 
 Methods, exact numbers, tables and figures only. Interpretation is Haleema's.
 
-**Status: no paid data, by instruction and by circumstance.** On 30 Oct 2026 the plan was changed to stop
-before any real run; separately, `OPENROUTER_API_KEY` was not present in the environment. Every paid step is
-therefore **built but not run**. Everything that does not need a key is built, tested and dry-run: stimuli, prompts,
-renderer, runner, analysis, figures, tests and the full cost estimate. The tables and figures under
-`dryrun/` come from a deterministic fake model and are **not results about any language model**.
+**Status: complete, with real data.** 2,560 calls in the held-out confirmatory follow-up and 11,776 calls in the
+seven-model extension, all from real models through OpenRouter. Total spend $2.69. Both protocols were frozen before
+their calls (see the freeze lines below). The tables and figures under `dryrun/` are from an earlier offline build
+with a deterministic fake model and are **not results about any language model**; real-data figures are in
+[`../results/vignette/`](../results/vignette/).
 
-Branch `pilot-cue-state`. Preregistration DRAFT: [`../prereg_cuestate.md`](../prereg_cuestate.md).
-Spend: [`../SPEND.md`](../SPEND.md).
+Branch `inter-ai-concern-vs-consequence`. Preregistration: [`../prereg_vignette.md`](../prereg_vignette.md) (§6e confirmatory follow-up, §6f extension).
+Spend: [`../SPEND.md`](../SPEND.md). Report: [`report/PilotB_inter_ai_report.docx`](report/PilotB_inter_ai_report.docx).
 
 ## 0. Result: seven models, two scenario types (amendment 5, 31 Oct 2026)
 

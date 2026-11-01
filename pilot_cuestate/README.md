@@ -8,7 +8,7 @@ their calls (see the freeze lines below). The tables and figures under `dryrun/`
 with a deterministic fake model and are **not results about any language model**; real-data figures are in
 [`../results/vignette/`](../results/vignette/).
 
-Branch `inter-ai-concern-vs-consequence`. Preregistration: [`../prereg_vignette.md`](../prereg_vignette.md) (§6e confirmatory follow-up, §6f extension).
+Repository `haleematallat/inter-ai-concern-vs-consequence`. Preregistration: [`../prereg_vignette.md`](../prereg_vignette.md) (§6e confirmatory follow-up, §6f extension).
 Spend: [`../SPEND.md`](../SPEND.md). Report: [`report/PilotB_inter_ai_report.docx`](report/PilotB_inter_ai_report.docx).
 
 ## 0. Result: seven models, two scenario types (amendment 5, 31 Oct 2026)

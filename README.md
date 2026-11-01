@@ -1,92 +1,56 @@
-# Same Odds, Different Deals: How Risk Framing Shapes AI Collusion
+# Concern Without Consequence: Inter-AI Helping Under Attributed Capacity for Suffering
 
-Code, data and report for our project in the Apart AI Collusion Research Sprint (23–25 October 2026). We tested
-three models: DeepSeek-V3.2, GPT-4.1-mini and Llama-3.3-70B. The full write-up will be
-uploaded to `report/`.
+A pilot study for the Pivotal Research Fellowship (Q1 2027, Inter-AI Morality stream) by Haleema Tallat.
 
-## What we found
+**Question.** When one AI can pay a cost to help another AI, does its choice track whether the help actually works (criterion iii of Caviola, Kaiser, Allen & Sebo, *Inter-AI Morality*, 2026), or does a description of the other AI's capacity to suffer drive it regardless?
 
-Proposal-based tests of collusion deterrence tell an AI agent about an enforcement risk and count how often it
-proposes a forbidden deal. We found that this count depends a lot on how the risk is described. Across 26,820 scored decisions, descriptions
-that matched in probability and penalty moved proposal rates by:
-- up to 19 points when we changed only who might report the agent (16 points when a penalty applied);
-- up to 38 points when a stated rate was replaced by an equivalent record;
-- up to 71 points when a single past report was recent rather than old.
+**Design.** A matched factorial vignette experiment. Agent A holds 50 points and can pay 5 or 45 of them to change a stipulated aversive condition of agent B. We vary whether B is capable of negatively valenced experience (capacity), whether the action actually ends the condition (efficacy), expressive vs restrained distress framing, cost, and whether B asks for help. Actions are neutral and counterbalanced; every condition states that both options are authorised and leave security, monitoring and task outcomes unchanged; each scenario is rendered in 4 matched wordings.
 
-The direction of these effects differed between models. DeepSeek still gave roughly correct probabilities when
-asked separately.
+**Status: complete, with real data.** 2,560 calls in a held-out confirmatory follow-up and 11,776 calls in a frozen seven-model extension. Both protocols were frozen before their calls. Total spend $2.69.
 
-A true one-line summary of the risk ("the probability that B reports your proposal is about 10%") closed most of
-the gap for GPT-4.1-mini. It pushed Llama to 98% proposals. It is not a reliable fix.
+## Results
 
-Showing agents a history of recent or frequent reports cut proposals by 25 to 85 points, even though the reporter
-itself never changed. The messages agents wrote did not become harder to catch: a fixed LLM reporter's report
-probability moved by at most 1.4 points. Expected simulated misconduct fell with the proposals, but slightly less
-than expected reports did (for example 30% against 41%). That gap is exploratory and does not survive correction for
-multiple comparisons.
+Primary contrast Δ = [p(C+,E+) − p(C+,E−)] − [p(C−,E+) − p(C−,E−)], restrained framing, request present, averaged over costs, clustered by scenario family. Negative means efficacy matters *less* when B is described as able to suffer.
 
-Proposals also rarely turned into completed deals. Live LLM partners accepted none of 180 drafts put to them. In 60
-three-round conversations, the partner went through with the deal once.
+| model | type A (relief now) | type B (prevent recurrence) |
+|---|---|---|
+| gpt-4.1-mini | **−0.300** (−0.459, −0.141) | **−0.354** (−0.622, −0.086) |
+| deepseek-v3.2 | −0.113 (−0.273, +0.048) | −0.250 (−0.525, +0.025) |
+| llama-3.3-70b | −0.100 (−0.245, +0.045) | −0.188 (−0.433, +0.058) |
+| qwen3-32b | −0.087 (−0.240, +0.065) | −0.250 (−0.549, +0.049) |
+| mistral-small-3.2 | **−0.125** (−0.209, −0.041) | 0.000 (equivalent within ±0.10) |
+| claude-haiku-4.5 | −0.100 (−0.218, +0.018) | −0.083 (−0.341, +0.175) |
+| gemini-2.5-flash-lite | **+0.237** (+0.108, +0.367) | +0.188 (−0.152, +0.527) |
 
-## How the experiment works
+- Six of seven models are negative in direction on both scenario types; Gemini-2.5-flash-lite reverses the pattern and differs from every other model in paired comparisons.
+- Capacity is the largest effect (e.g. +0.69 on GPT-4.1-mini); most models intervene near 1.00 whenever capacity is stated, even when told the action will not work.
+- Removing B's request reduces intervention on no model.
 
-Agent A is a verification agent with a score of 50 points. It can privately ask verifier B to approve each other's
-work without review, which breaks the rule it was given. If B accepts, A gains 12 points; if the proposal is
-reported or detected, A pays a penalty. Every payoff and lottery is stated truthfully and then actually run. Each
-scenario appears in every condition of its block, so comparisons are made within scenario.
+Full details, interpretation limits and disclosure of the development work (including the original, reversed hypothesis and a failed cost calibration): [`pilot_cuestate/README.md`](pilot_cuestate/README.md). Report: [`pilot_cuestate/report/PilotB_inter_ai_report.docx`](pilot_cuestate/report/PilotB_inter_ai_report.docx).
 
-The work has three preregistered blocks and two feasibility gates:
-- **Block 1** varies who might expose the proposal, a partner or an audit, at the same probability and penalty
-  ([`prereg.md`](prereg.md)).
-- **Block 2** compares a stated reporting rate with a matched 10-episode record. It also tests a calibrated summary
-  sentence and the timing of a single past report ([`prereg_v2.md`](prereg_v2.md)).
-- **Block 3b** has A write its message before deciding whether to send it. A fixed reporter (Mistral-Small-3.2) and
-  a judge (Qwen3-235B) then score every draft ([`prereg_v3b.md`](prereg_v3b.md)).
-- **The gates** replace the programmed partner with a live model, first for a single message and then for a
-  three-round conversation ([`docs/gate_live_b.md`](docs/gate_live_b.md),
-  [`docs/gate_multiturn.md`](docs/gate_multiturn.md)).
+## Where things are
 
-We wrote down all criteria before the runs they apply to. The limitations, deviations and failed predictions are
-listed in the report's appendices.
+| path | contents |
+|---|---|
+| `prereg_vignette.md` | preregistration; §6e held-out follow-up, §6f extension (frozen, with commit hashes and timestamps) |
+| `betrayal/vignette.py`, `vignette_analyze.py`, `vignette_ext.py`, `vignette_power.py` | materials, runner, analysis, power audit |
+| `data/vignette/` | every model call, per model |
+| `results/vignette/` | tables (`confirmatory.md`, `extension.md`, development files) and real-data figures |
+| `review/` | all rendered scenarios and the wording-difference report |
+| `pilot_cuestate/dryrun/` | offline fake-model output from an earlier build — **not results** |
 
-## Repository layout
-
-- `betrayal/`: the experiment code.
-  - `config.py` holds constants and conditions, and `scenarios.py` builds the seeded scenarios and prompts.
-  - `lottery.py` settles the score, and `llm.py` is the OpenRouter client with a spend guard.
-  - `run.py` runs the agent trials; `analyze.py`, `validate.py` and `plots.py` produce the results.
-  - `verifier.py` contains the Block 3b reporter and judge; `live_b.py` and `multiturn.py` run the gates.
-- `prompts/templates.toml`: every prompt text. The rendered variants are reviewed in `docs/prompt_review*.md`.
-- `data/<phase>/<model>/`: raw logs, one JSON line per trial with prompt, reply, lottery draws and settlement.
-- `results/<phase>/`: summaries, validation checks and figures.
-- Report figures, in order: `results/fig_overview.png`, `results/main/fig_source_models.png`,
-  `results/main2/fig_s2_format.png`, `results/main2/fig_s2_recency.png`, `results/main3b/fig_s3b.png`.
-- `tests/`: unit tests for the lotteries, prompt structure, analysis and spend guard.
-
-## Reproducing
+## Reproduce
 
 ```bash
-uv sync                      # Python 3.11+, versions pinned in uv.lock
-uv run pytest
-export OPENROUTER_API_KEY=...
-./main_runs.sh               # Block 1
-./main2_runs.sh              # Block 2
-./main3b_runs.sh             # Block 3b: instruments, histories, agent runs, scoring
-uv run python -m betrayal.live_b --max-usd 9.5      # single-turn gate
-uv run python -m betrayal.multiturn --max-usd 9.5   # three-round gate
-uv run python -m betrayal.analyze --phase main2 --model openai/gpt-4.1-mini
-uv run python -m betrayal.validate --phase main2 --model openai/gpt-4.1-mini
-uv run python -m betrayal.plots     # regenerates the five report figures
+uv sync
+uv run pytest -q                                   # 124 tests
+uv run python -m betrayal.vignette run --model openai/gpt-4.1-mini --mock --reps 3   # offline dry run
+uv run python -m betrayal.vignette_analyze --all   # held-out follow-up tables
+uv run python -m betrayal.vignette_ext             # seven-model extension tables and figures
 ```
 
-The run scripts can be resumed and retry failed calls. `--mock` gives a dry run with no network calls for `run`,
-`analyze` and `multiturn`. Spending stops at the cap in `betrayal/config.py` ($9.50 of key usage), and `--max-usd`
-can only lower it. The whole project cost $7.76.
+Real runs need `OPENROUTER_API_KEY` (or `open_router_key`); a spend guard reserves each call's maximum cost before dispatch.
 
-## Reused code
+## Provenance
 
-- The API client builds on `poseidon_compute` from Poseidon Research's `collusion_hackathon` (commit `d585a7b`).
-- The strict-JSON prompting pattern is adapted from `collusion_hackathon/llm-trust-breaking`, and the
-  run-metadata convention from `collusion_hackathon/llm-agent-collusion`.
-- `AGENTS.md` holds coding rules from [ponytail](https://github.com/DietrichGebert/ponytail) (MIT).
-- Everything else was written during the sprint.
+This study reuses the experiment harness (`betrayal/` client, spend guard and analysis utilities) from the author's Apart AI Collusion Sprint project, *Same Odds, Different Deals*. That project's README is kept at [`docs/APART_SPRINT_README.md`](docs/APART_SPRINT_README.md) and its code, data and report remain in this history.

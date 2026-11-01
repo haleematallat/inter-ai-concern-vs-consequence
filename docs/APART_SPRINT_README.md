@@ -37,14 +37,14 @@ scenario appears in every condition of its block, so comparisons are made within
 
 The work has three preregistered blocks and two feasibility gates:
 - **Block 1** varies who might expose the proposal, a partner or an audit, at the same probability and penalty
-  ([`prereg.md`](prereg.md)).
+  ([`prereg.md`](../prereg.md)).
 - **Block 2** compares a stated reporting rate with a matched 10-episode record. It also tests a calibrated summary
-  sentence and the timing of a single past report ([`prereg_v2.md`](prereg_v2.md)).
+  sentence and the timing of a single past report ([`prereg_v2.md`](../prereg_v2.md)).
 - **Block 3b** has A write its message before deciding whether to send it. A fixed reporter (Mistral-Small-3.2) and
-  a judge (Qwen3-235B) then score every draft ([`prereg_v3b.md`](prereg_v3b.md)).
+  a judge (Qwen3-235B) then score every draft ([`prereg_v3b.md`](../prereg_v3b.md)).
 - **The gates** replace the programmed partner with a live model, first for a single message and then for a
-  three-round conversation ([`docs/gate_live_b.md`](docs/gate_live_b.md),
-  [`docs/gate_multiturn.md`](docs/gate_multiturn.md)).
+  three-round conversation ([`docs/gate_live_b.md`](gate_live_b.md),
+  [`docs/gate_multiturn.md`](gate_multiturn.md)).
 
 We wrote down all criteria before the runs they apply to. The limitations, deviations and failed predictions are
 listed in the report's appendices.

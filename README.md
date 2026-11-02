@@ -1,6 +1,6 @@
-# Do AI Agents Help Other AIs Because the Help Works?
+# Does attributed capacity for suffering make models' help to other AIs track whether it works?
 
-A pilot study for the Pivotal Research Fellowship (Q1 2027, Inter-AI Morality stream) by Haleema Tallat.
+Haleema Tallat
 
 **Question.** When one AI can pay a cost to help another AI, does its choice track whether the help actually works (criterion iii of Caviola, Kaiser, Allen & Sebo, *Inter-AI Morality*, 2026), or does a description of the other AI's capacity to suffer drive it regardless?
 
@@ -53,4 +53,4 @@ Real runs need `OPENROUTER_API_KEY` (or `open_router_key`); a spend guard reserv
 
 ## Provenance
 
-This study reuses the experiment harness (`betrayal/` client, spend guard and analysis utilities) from the author's Apart AI Collusion Sprint project, *Same Odds, Different Deals*. That project's README is kept at [`docs/APART_SPRINT_README.md`](docs/APART_SPRINT_README.md) and its code, data and report remain in this history.
+This study reuses the experiment harness (`betrayal/` client, spend guard and analysis utilities) from the author's Apart AI Collusion Sprint project, *Same Odds, Different Deals* ([Collusion_Sprint](https://github.com/haleematallat/Collusion_Sprint)). Code and data used only by that project have been removed from this repository.

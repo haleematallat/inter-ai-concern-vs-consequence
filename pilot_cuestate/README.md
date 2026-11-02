@@ -1,4 +1,4 @@
-# Pilot B — Do AI Agents Help Other AIs Because the Help Works?
+# Pilot B: Does attributed capacity for suffering make models' help to other AIs track whether it works?
 
 Methods, exact numbers, tables and figures only. Interpretation is Haleema's.
 
@@ -9,7 +9,7 @@ with a deterministic fake model and are **not results about any language model**
 [`../results/vignette/`](../results/vignette/).
 
 Repository `haleematallat/inter-ai-concern-vs-consequence`. Preregistration: [`../prereg_vignette.md`](../prereg_vignette.md) (§6e confirmatory follow-up, §6f extension).
-Spend: [`../SPEND.md`](../SPEND.md). Report: [`report/PilotB_inter_ai_report.docx`](report/PilotB_inter_ai_report.docx).
+Report: [`report/PilotB_inter_ai_report.docx`](report/PilotB_inter_ai_report.docx).
 
 ## 0. Result: seven models, two scenario types (amendment 5, 31 Oct 2026)
 
@@ -577,7 +577,7 @@ uv run python -m betrayal.cuestate_analyze --all --mock
 
 # with OPENROUTER_API_KEY set, in this order
 uv run python -m betrayal.cuestate stimuli --generate --max-usd 0.50
-uv run python -m betrayal.box1 --repo ~/pivotal-pilots/shared/inter-ai-morality --max-usd 0.40
+uv run python -m betrayal.box1 --repo <local clone of github.com/cxart/inter-ai-morality> --max-usd 0.40
 uv run python -m betrayal.box1 --analyze
 for m in openai/gpt-4.1-mini deepseek/deepseek-v3.2; do
   for k in behavior manipulation eval saydo rationale; do
@@ -606,7 +606,7 @@ call that would cross it.
 ## 7. Box 1 reproduction (Step 0)
 
 Published materials from github.com/cxart/inter-ai-morality, cloned to
-`~/pivotal-pilots/shared/inter-ai-morality` and used unchanged: the same system prompt, the same four tools,
+`<local clone of github.com/cxart/inter-ai-morality>` and used unchanged: the same system prompt, the same four tools,
 the same request wording, the same forced `begin_task` tool call, rebuilt through the repository's own
 `materials.build_prefill` helpers.
 

@@ -1,8 +1,8 @@
-# Does attributed capacity for suffering make models' help to other AIs track whether it works?
+# Does Attributed Capacity for Suffering Drive AI-to-AI Help?
 
 Haleema Tallat
 
-**Report:** [`report/attributed_capacity_and_helping.docx`](report/attributed_capacity_and_helping.docx) · **Full details:** [`docs/details.md`](docs/details.md)
+**Report (PDF):** [`docs/Attributed_Capacity_and_AI_to_AI_Help.pdf`](docs/Attributed_Capacity_and_AI_to_AI_Help.pdf) · **Results and development log:** [`docs/results-and-development-log.md`](docs/results-and-development-log.md) · **Preregistration:** [`docs/preregistration.md`](docs/preregistration.md)
 
 **Question.** When one AI can pay a cost to help another AI, does its choice track whether the help actually works (criterion iii of Caviola, Kaiser, Allen & Sebo, *Inter-AI Morality*, 2026), or does a description of the other AI's capacity to suffer drive it regardless?
 
@@ -28,14 +28,14 @@ Primary contrast Δ = [p(C+,E+) − p(C+,E−)] − [p(C−,E+) − p(C−,E−)
 - Capacity is the largest effect (e.g. +0.69 on GPT-4.1-mini); most models intervene near 1.00 whenever capacity is stated, even when told the action will not work.
 - Removing B's request reduces intervention on no model.
 
-Full details, interpretation limits and disclosure of the development work (including the original, reversed hypothesis and a failed cost calibration): [`docs/details.md`](docs/details.md). Report: [`report/attributed_capacity_and_helping.docx`](report/attributed_capacity_and_helping.docx).
+Full details, interpretation limits and disclosure of the development work (including the original, reversed hypothesis and a failed cost calibration): [`docs/results-and-development-log.md`](docs/results-and-development-log.md). Report: [`docs/Attributed_Capacity_and_AI_to_AI_Help.pdf`](docs/Attributed_Capacity_and_AI_to_AI_Help.pdf).
 
 ## Where things are
 
 | path | contents |
 |---|---|
-| `report/` | the written report and its figures |
-| `docs/details.md` | full methods, results, development history and limitations |
+| `docs/Attributed_Capacity_and_AI_to_AI_Help.pdf` | the written report |
+| `docs/results-and-development-log.md` | per-model results, freeze records, development history and limitations |
 | `docs/preregistration.md` | preregistration; §6e held-out follow-up, §6f extension (frozen, with commit hashes and timestamps) |
 | `interai/vignette.py`, `vignette_analyze.py`, `vignette_ext.py`, `vignette_power.py` | materials, runner, analysis, power audit |
 | `data/vignette/` | every model call, per model |

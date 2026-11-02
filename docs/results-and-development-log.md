@@ -1,6 +1,6 @@
-# Does attributed capacity for suffering make models' help to other AIs track whether it works?
+# Results and development log
 
-Methods, exact numbers, tables and figures only. Interpretation is Haleema's.
+*Does Attributed Capacity for Suffering Drive AI-to-AI Help?* · Companion to the [report](Attributed_Capacity_and_AI_to_AI_Help.pdf): the per-model tables, freeze records and development history behind it.
 
 **Status: complete, with real data.** 2,560 calls in the held-out confirmatory follow-up and 11,776 calls in the
 seven-model extension, all from real models through OpenRouter. Total spend $2.69. Both protocols were frozen before
@@ -8,7 +8,6 @@ their calls (see the freeze lines below). Figures are in
 [`../results/vignette/`](../results/vignette/).
 
 Repository `haleematallat/inter-ai-concern-vs-consequence`. Preregistration: [`preregistration.md`](preregistration.md) (§6e confirmatory follow-up, §6f extension).
-Report: [`report/attributed_capacity_and_helping.docx`](../report/attributed_capacity_and_helping.docx).
 
 ## 0. Result: seven models, two scenario types (amendment 5, 31 Oct 2026)
 

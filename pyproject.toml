@@ -1,7 +1,7 @@
 [project]
 name = "inter-ai-concern-vs-consequence"
 version = "0.1.0"
-description = "Does attributed capacity for suffering make models' help to other AIs track whether it works?"
+description = "Does Attributed Capacity for Suffering Drive AI-to-AI Help?"
 requires-python = ">=3.11"
 dependencies = [
     "poseidon-compute @ git+https://github.com/poseidon-research/collusion_hackathon@d585a7b3be50366cc2bdf5789bf8add5890b2abd#subdirectory=util",

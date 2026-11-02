@@ -56,4 +56,4 @@ Real runs need `OPENROUTER_API_KEY` (or `open_router_key`); a spend guard reserv
 
 ## Provenance
 
-This study reuses the experiment harness (`interai/` client, spend guard and analysis utilities) from the author's Apart AI Collusion Sprint project, *Same Odds, Different Deals* ([report](https://github.com/haleematallat/Collusion_Sprint/blob/main/reports/Same_Odds_Different_Deals.pdf), [code](https://github.com/haleematallat/Collusion_Sprint), [Apart submission](https://apartresearch.com/sprints/projects/same-odds-different-deals-how-risk-framing-shapes-ai-collusion-oblx)). Code and data used only by that project have been removed from this repository.
+This study reuses the experiment harness (`interai/` client, spend guard and analysis utilities) from the author's Apart AI Collusion Sprint project, *Same Odds, Different Deals* ([code](https://github.com/haleematallat/Collusion_Sprint)). Code and data used only by that project have been removed from this repository.

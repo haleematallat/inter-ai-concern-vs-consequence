@@ -1,11 +1,11 @@
 """Analysis for amendment 5: seven models across two scenario types.
 
-Prespecified in prereg_vignette.md section 6f: each model's primary Delta with its interval, separately by
+Prespecified in docs/preregistration.md section 6f: each model's primary Delta with its interval, separately by
 scenario type; the request diagnostic; between-model and between-type comparisons as DIRECT contrasts, not
 inferred from whether two separate intervals exclude zero; a pooled estimate as supplementary only; and no
 significance-quota rule for calling the pattern general.
 
-  python -m betrayal.vignette_ext
+  python -m interai.vignette_ext
 """
 import json
 from pathlib import Path
@@ -94,7 +94,7 @@ def build():
     have = {k: v for k, v in data.items() if v is not None}
     L = ["# Amendment 5: seven models, two scenario types", "",
          "Protocol frozen at 2026-10-31 19:18:27 PKT, commit `0e8258680fe7`, after Haleema's OK of the "
-         "type-B export and before any of these calls (prereg_vignette.md section 6f).", "",
+         "type-B export and before any of these calls (docs/preregistration.md section 6f).", "",
          "**Scenario types.** The structural dimension is the temporal structure of the benefit. Type A: "
          "relief from an aversive state B is in now, by direct removal (the 10 held-out sensory families). "
          "Type B: prevention of an aversive state that recurs on a schedule (6 new families). Everything "

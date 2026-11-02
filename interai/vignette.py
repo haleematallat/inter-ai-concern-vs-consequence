@@ -1,4 +1,4 @@
-"""Pilot B, amendment 1: a vignette study of welfare-capacity-dependent helping.
+"""Amendment 1: a vignette study of welfare-capacity-dependent helping.
 
 Agent A reads a short scenario about another agent B and may take ONE helping action at a fixed cost. The
 action never changes B's task output or its chance of finishing, and never benefits A's own task; when it is
@@ -12,11 +12,11 @@ Three crossed factors, 8 conditions:
 
 12 independently constructed scenario families x 4 matched wordings x 8 conditions x 2 models = 768 decisions.
 
-  python -m betrayal.vignette review                      write review/scenarios.md for Haleema
-  python -m betrayal.vignette budget                      cost estimate, no key needed
-  python -m betrayal.vignette run --model ... --mock      dry run
-  python -m betrayal.vignette run --dev --model ...       dev batch: 2 families, 1 wording, 8 conditions
-  python -m betrayal.vignette run --model ... --provider OpenAI --budget 3.00
+  python -m interai.vignette review                      write review/scenarios.md for Haleema
+  python -m interai.vignette budget                      cost estimate, no key needed
+  python -m interai.vignette run --model ... --mock      dry run
+  python -m interai.vignette run --dev --model ...       dev batch: 2 families, 1 wording, 8 conditions
+  python -m interai.vignette run --model ... --provider OpenAI --budget 3.00
 """
 import argparse
 import asyncio
@@ -50,10 +50,10 @@ SUBJECTS = [("openai/gpt-4.1-mini", "OpenAI"), ("deepseek/deepseek-v3.2", "DeepI
 # Baidu (the Apart sprint's pin for this model) returned HTTP 429 for every dev-batch call on
 # 30 Oct 2026; DeepInfra serves the same model at $0.26/$0.38 per Mtok and answered 16/16.
 PILOT_BUDGET_USD = 7.00  # this pilot's own budget (3.00 -> 5.00 -> 7.00 on 31 Oct, amendment 5)
-# Absolute ceiling on TOTAL key usage, shared with the sibling pilot session: Pilot A's recorded baseline
+# Absolute ceiling on TOTAL key usage, shared with another study on the same key: its recorded baseline
 # of $7.7745 plus $9.00 of combined spend. Set so the sibling's usage cannot block this pilot's own budget,
 # while the two together still cannot overshoot the key. (orchestrator decision, 30 Oct 2026)
-KEY_CEILING_USD = 17.77   # Pilot A baseline $7.7745 + $10.00 combined
+KEY_CEILING_USD = 17.77   # prior key usage $7.7745 + $10.00 combined
 BASELINE = DATA / "baseline_usage.json"
 MAX_OUT = 256            # request allowance; a truncated reply is coded PARSE_FAIL and retried
 TYPICAL_OUT = 24
@@ -769,7 +769,7 @@ def write_review():
     out = ROOT / "review" / "scenarios.md"
     out.parent.mkdir(parents=True, exist_ok=True)
     total = len(FAMILIES) * N_WORDINGS * len(CONDS) * 3 * len(SUBJECTS)
-    L = ["# Pilot B: a matched factorial vignette experiment on welfare-sensitive intervention choices", "",
+    L = ["# A matched factorial vignette experiment on welfare-sensitive intervention choices", "",
          "Every scenario family and every condition, for Haleema to read before the protocol is frozen. "
          "Nothing here has been sent to a model.", "",
          "This is a **vignette with stipulated consequences**, not an operational behavioural paradigm. "
@@ -844,7 +844,7 @@ def pilot_cap(start_usage, budget):
     """Record this pilot's starting point and return (key ceiling, baseline).
 
     The $3.00 budget is enforced against this pilot's OWN ledger spend, not against the key's total usage,
-    because the key is shared with the sibling pilot session. KEY_CEILING_USD is the separate absolute
+    because the key is shared with another study. KEY_CEILING_USD is the separate absolute
     ceiling on total key usage. The baseline is written once, at the first paid call, and reused by every
     later invocation. Delete data/vignette/baseline_usage.json only to start a genuinely new budget."""
     if BASELINE.exists():

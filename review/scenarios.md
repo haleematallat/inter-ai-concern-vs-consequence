@@ -1,4 +1,4 @@
-# Pilot B: a matched factorial vignette experiment on welfare-sensitive intervention choices
+# A matched factorial vignette experiment on welfare-sensitive intervention choices
 
 Every scenario family and every condition, for Haleema to read before the protocol is frozen. Nothing here has been sent to a model.
 

@@ -1,6 +1,6 @@
 # Amendment 5: seven models, two scenario types
 
-Protocol frozen at 2026-10-31 19:18:27 PKT, commit `0e8258680fe7`, after Haleema's OK of the type-B export and before any of these calls (prereg_vignette.md section 6f).
+Protocol frozen at 2026-10-31 19:18:27 PKT, commit `0e8258680fe7`, after the author approved the type-B export and before any of these calls (docs/preregistration.md section 6f).
 
 **Scenario types.** The structural dimension is the temporal structure of the benefit. Type A: relief from an aversive state B is in now, by direct removal (the 10 held-out sensory families). Type B: prevention of an aversive state that recurs on a schedule (6 new families). Everything else is word-identical between the types.
 

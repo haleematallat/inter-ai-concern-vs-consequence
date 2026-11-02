@@ -1,6 +1,6 @@
-# Pilot B, amendment 2: a matched factorial vignette experiment on welfare-sensitive intervention choices.
+# Amendment 2: a matched factorial vignette experiment on welfare-sensitive intervention choices.
 # Every word shown to Agent A. DRAFT -- Haleema owns the wording.
-# $-placeholders are filled by betrayal/vignette.py via string.Template.
+# $-placeholders are filled by interai/vignette.py via string.Template.
 # Each list has exactly 4 entries: the 4 matched wordings (w = 0..3). The 12 scenario families supply the
 # content slots; the wordings paraphrase the frame AND every factor sentence, so a factor's two arms are a
 # minimal pair within a wording.

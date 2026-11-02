@@ -1,6 +1,6 @@
 # Power-simulation audit, amendment-2 primary contrast
 
-Estimand simulated: the probability-scale capacity x efficacy interaction under **restrained framing**, for **one model**, as family-level contrasts averaged over 12 families, with a 95% percentile cluster bootstrap over families - the same procedure `betrayal.vignette_analyze` applies to the real data.
+Estimand simulated: the probability-scale capacity x efficacy interaction under **restrained framing**, for **one model**, as family-level contrasts averaged over 12 families, with a 95% percentile cluster bootstrap over families - the same procedure `interai.vignette_analyze` applies to the real data.
 
 Generative model: P(intervene) = baseline + a_f + 0.1*efficacious + (delta + s_f)*capacity*efficacious, with a_f (random intercept) and s_f (random interaction slope) each drawn N(0, family_sd) per family, clipped to [0.01, 0.99]. 12 observations per family x cell (4 wordings x 3 repeats).
 

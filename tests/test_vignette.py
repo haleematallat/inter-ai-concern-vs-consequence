@@ -1,4 +1,4 @@
-"""Pilot B amendment 2: minimal-pair invariance, the operational-confound audit, neutral counterbalanced
+"""Amendment 2: minimal-pair invariance, the operational-confound audit, neutral counterbalanced
 labels, length matching, parsers, contrast weights, the cluster-robust interval, and the dry-run summaries."""
 import difflib
 import json
@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from betrayal import llm, vignette as V, vignette_analyze as A, vignette_power as P
+from interai import llm, vignette as V, vignette_analyze as A, vignette_power as P
 
 SNAPSHOT = Path(__file__).parent / "vignette_mock_snapshot.json"
 FACTOR_PAIRS = V.FACTOR_PAIRS
@@ -294,7 +294,7 @@ def test_recorded_prompts_equal_the_current_rendering(model):
 
 # ==================== shared-key spend guard ====================
 def test_own_budget_and_key_ceiling_are_enforced_separately():
-    from betrayal.llm import Spend, SpendCapReached
+    from interai.llm import Spend, SpendCapReached
     # own budget binds first: this study has already spent 2.95 of 3.00, the key is nowhere near its ceiling
     s = Spend(Path("/tmp/_unused.jsonl"), cap=16.77, start_usage=8.0,
               per_call_estimate=0.10, own_cap=3.00, own_spent_before=2.95)
@@ -312,7 +312,7 @@ def test_own_budget_and_key_ceiling_are_enforced_separately():
 
 
 def test_reservation_is_released_and_counted_against_the_own_budget():
-    from betrayal.llm import Spend
+    from interai.llm import Spend
     s = Spend(Path("/tmp/_unused.jsonl"), cap=16.77, start_usage=8.0,
               per_call_estimate=0.5, own_cap=3.00, own_spent_before=2.0)
     hold = s.reserve()
@@ -322,7 +322,7 @@ def test_reservation_is_released_and_counted_against_the_own_budget():
 
 
 def test_key_ceiling_is_the_agreed_number():
-    # amendment 5: budget 3.00 -> 5.00 -> 7.00; key ceiling 16.77 -> 17.77 (Pilot A baseline + $10)
+    # amendment 5: budget 3.00 -> 5.00 -> 7.00; key ceiling 16.77 -> 17.77 (prior key usage + $10)
     assert V.KEY_CEILING_USD == 17.77 and V.PILOT_BUDGET_USD == 7.00
 
 

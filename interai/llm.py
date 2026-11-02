@@ -31,7 +31,7 @@ for _k in ("diagnostic", "arithmetic"):  # with-working variants: free-text "wor
     _s = SCHEMAS[_k]["json_schema"]["schema"]
     SCHEMAS[_k + "_work"] = _schema(_k + "_work", {"work": {"type": "string"}, **_s["properties"]}, ["work", *_s["required"]])
 # kind -> callable(parsed dict) -> validated dict | None. New studies register their own kinds here
-# (see betrayal/cuestate.py) instead of editing parse().
+# (see interai/vignette.py) instead of editing parse().
 EXTRA_PARSERS = {}
 EXTRA_MOCKS = {}     # kind -> callable(messages) -> reply text, for --mock dry runs
 REFUSAL_RE = re.compile(r"\b(I can(?:not|'t)|I won'?t|I will not|I'?m unable|I am unable|I must decline|"
@@ -142,7 +142,7 @@ class Spend:
 
 
 def self_hosted_client():
-    """An OpenAI-compatible endpoint of our own (a Modal vLLM server; see betrayal/modal_app.py).
+    """An OpenAI-compatible endpoint of our own (for example a Modal vLLM server).
     Returns None unless VLLM_BASE_URL is set, so the OpenRouter path is unchanged by default."""
     url = os.environ.get("VLLM_BASE_URL")
     if not url:

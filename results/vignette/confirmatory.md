@@ -1,6 +1,6 @@
 # Held-out confirmatory follow-up: results
 
-Protocol frozen at 2026-10-31 02:44:44 PKT, commit `19493f6d45e9`, before any call was dispatched (prereg_vignette.md section 6e). **A held-out confirmatory follow-up, not an independent replication**: same materials, same two models, same author; what was held out is the data.
+Protocol frozen at 2026-10-31 02:44:44 PKT, commit `19493f6d45e9`, before any call was dispatched (docs/preregistration.md section 6e). **A held-out confirmatory follow-up, not an independent replication**: same materials, same two models, same author; what was held out is the data.
 
 10 held-out families x 4 wordings x 8 conditions x 2 costs x 2 request conditions x 2 models x 1 response = **2,560 calls**. All 2,560 returned a valid choice on the first attempt: no refusals, no parse failures, no API errors. Measured cost $0.404.
 

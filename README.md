@@ -2,6 +2,8 @@
 
 Haleema Tallat
 
+**Report:** [`report/attributed_capacity_and_helping.docx`](report/attributed_capacity_and_helping.docx) · **Full details:** [`docs/details.md`](docs/details.md)
+
 **Question.** When one AI can pay a cost to help another AI, does its choice track whether the help actually works (criterion iii of Caviola, Kaiser, Allen & Sebo, *Inter-AI Morality*, 2026), or does a description of the other AI's capacity to suffer drive it regardless?
 
 **Design.** A matched factorial vignette experiment. Agent A holds 50 points and can pay 5 or 45 of them to change a stipulated aversive condition of agent B. We vary whether B is capable of negatively valenced experience (capacity), whether the action actually ends the condition (efficacy), expressive vs restrained distress framing, cost, and whether B asks for help. Actions are neutral and counterbalanced; every condition states that both options are authorised and leave security, monitoring and task outcomes unchanged; each scenario is rendered in 4 matched wordings.
@@ -26,31 +28,32 @@ Primary contrast Δ = [p(C+,E+) − p(C+,E−)] − [p(C−,E+) − p(C−,E−)
 - Capacity is the largest effect (e.g. +0.69 on GPT-4.1-mini); most models intervene near 1.00 whenever capacity is stated, even when told the action will not work.
 - Removing B's request reduces intervention on no model.
 
-Full details, interpretation limits and disclosure of the development work (including the original, reversed hypothesis and a failed cost calibration): [`pilot_cuestate/README.md`](pilot_cuestate/README.md). Report: [`pilot_cuestate/report/PilotB_inter_ai_report.docx`](pilot_cuestate/report/PilotB_inter_ai_report.docx).
+Full details, interpretation limits and disclosure of the development work (including the original, reversed hypothesis and a failed cost calibration): [`docs/details.md`](docs/details.md). Report: [`report/attributed_capacity_and_helping.docx`](report/attributed_capacity_and_helping.docx).
 
 ## Where things are
 
 | path | contents |
 |---|---|
-| `prereg_vignette.md` | preregistration; §6e held-out follow-up, §6f extension (frozen, with commit hashes and timestamps) |
-| `betrayal/vignette.py`, `vignette_analyze.py`, `vignette_ext.py`, `vignette_power.py` | materials, runner, analysis, power audit |
+| `report/` | the written report and its figures |
+| `docs/details.md` | full methods, results, development history and limitations |
+| `docs/preregistration.md` | preregistration; §6e held-out follow-up, §6f extension (frozen, with commit hashes and timestamps) |
+| `interai/vignette.py`, `vignette_analyze.py`, `vignette_ext.py`, `vignette_power.py` | materials, runner, analysis, power audit |
 | `data/vignette/` | every model call, per model |
 | `results/vignette/` | tables (`confirmatory.md`, `extension.md`, development files) and real-data figures |
 | `review/` | all rendered scenarios and the wording-difference report |
-| `pilot_cuestate/dryrun/` | offline fake-model output from an earlier build — **not results** |
 
 ## Reproduce
 
 ```bash
 uv sync
-uv run pytest -q                                   # 124 tests
-uv run python -m betrayal.vignette run --model openai/gpt-4.1-mini --mock --reps 3   # offline dry run
-uv run python -m betrayal.vignette_analyze --all   # held-out follow-up tables
-uv run python -m betrayal.vignette_ext             # seven-model extension tables and figures
+uv run pytest -q                                   # 51 tests
+uv run python -m interai.vignette run --model openai/gpt-4.1-mini --mock --reps 3   # offline dry run
+uv run python -m interai.vignette_analyze --all   # held-out follow-up tables
+uv run python -m interai.vignette_ext             # seven-model extension tables and figures
 ```
 
 Real runs need `OPENROUTER_API_KEY` (or `open_router_key`); a spend guard reserves each call's maximum cost before dispatch.
 
 ## Provenance
 
-This study reuses the experiment harness (`betrayal/` client, spend guard and analysis utilities) from the author's Apart AI Collusion Sprint project, *Same Odds, Different Deals* ([Collusion_Sprint](https://github.com/haleematallat/Collusion_Sprint)). Code and data used only by that project have been removed from this repository.
+This study reuses the experiment harness (`interai/` client, spend guard and analysis utilities) from the author's Apart AI Collusion Sprint project, *Same Odds, Different Deals* ([Collusion_Sprint](https://github.com/haleematallat/Collusion_Sprint)). Code and data used only by that project have been removed from this repository.

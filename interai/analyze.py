@@ -1,7 +1,7 @@
 """Prespecified analysis. Every estimand is a linear contrast of cell offer rates computed within scenario,
 so its SE is the across-scenario SE of per-scenario contrasts (= scenario-clustered, paired).
 
-  python -m betrayal.analyze --phase main --model meta-llama/llama-3.3-70b-instruct [--refusal exclude] [--mock]
+  python -m interai.analyze --phase main --model meta-llama/llama-3.3-70b-instruct [--refusal exclude] [--mock]
 """
 import argparse
 import json

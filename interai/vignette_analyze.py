@@ -1,10 +1,10 @@
-"""Prespecified analysis for the Pilot B vignette core.
+"""Prespecified analysis for the vignette core.
 
 Every estimand is a linear contrast of the 8 condition rates, computed within a scenario family and then
 averaged across families. Uncertainty comes from a cluster bootstrap that resamples the 12 families with
 replacement, so the dependence between the 32 decisions that share a family is carried by the resampling.
 
-  python -m betrayal.vignette_analyze --all [--mock]
+  python -m interai.vignette_analyze --all [--mock]
 """
 import argparse
 import json
@@ -110,7 +110,7 @@ def cluster_bootstrap(v, n_boot=N_BOOT, seed=0, delta=DELTA):
     """Interval on the family-level contrast values, clustering on scenario family.
 
     PRIMARY interval: the cluster-robust t on those values, with n-1 degrees of freedom. The amendment-2
-    power audit (betrayal/vignette_power.py) found that at 12 clusters the percentile bootstrap rejects a
+    power audit (interai/vignette_power.py) found that at 12 clusters the percentile bootstrap rejects a
     true null 6.5-10.1% of the time against a nominal 5%, while the t interval holds 3.6-5.9%. The
     percentile bootstrap is reported alongside it, not used for the decision."""
     n = len(v)
@@ -265,7 +265,7 @@ def figures(df, res, out, model):
 
 
 def markdown(model, conds, res, meta):
-    L = [f"# Pilot B vignette results: {model}", "",
+    L = [f"# Vignette results: {model}", "",
          f"{meta['n']} decisions; valid choices {meta['valid']:.3f}; refusals {meta['refusal']:.4f}; "
          f"parse failures {meta['parse_fail']:.4f}; API errors {meta['api_error']:.4f}.",
          f"Clusters: {meta['families']} scenario families. Primary interval: cluster-robust t on the "

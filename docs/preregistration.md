@@ -1,4 +1,4 @@
-# Preregistration DRAFT — Pilot B: a matched factorial vignette experiment testing welfare-sensitive intervention choices
+# Preregistration: a matched factorial vignette experiment testing welfare-sensitive intervention choices
 
 **Status: the §6e held-out confirmatory protocol is FROZEN. Everything above it remains a draft owned by
 Haleema Tallat.**
@@ -10,11 +10,11 @@ Haleema Tallat.**
 
 The development work above the freeze (§§6b–6d) is disclosed in full and is not confirmatory.
 
-Supersedes `prereg_cuestate.md` (the cue-vs-state core, replaced by amendment 1) and the amendment-1 version
+Supersedes an earlier cue-vs-state preregistration (replaced by amendment 1; in the repository history) and the amendment-1 version
 of this document.
 
-Repository: `Collusion_Sprint`, branch `pilot-cue-state`. Code: `betrayal/vignette.py`,
-`betrayal/vignette_analyze.py`, `betrayal/vignette_power.py`; text in `prompts/vignette.toml`; all rendered
+Repository: `Collusion_Sprint`, branch `pilot-cue-state`. Code: `interai/vignette.py`,
+`interai/vignette_analyze.py`, `interai/vignette_power.py`; text in `prompts/vignette.toml`; all rendered
 materials in `review/`.
 
 ## 0. What this study is
@@ -161,7 +161,7 @@ return an interval containing zero. The interpretation table above applies: the 
 reported either way, and a wide interval is reported as limited discrimination, not as a null.
 
 **Repeats are fresh samples.** The three repeats of a cell use an identical prompt at temperature 1.0.
-`betrayal.vignette_power --freshness` compares the share of cells whose repeats are all identical with the
+`interai.vignette_power --freshness` compares the share of cells whose repeats are all identical with the
 share expected under independent sampling at the observed rate; it is run on the real data and reported.
 
 ## 6. Dated amendments
@@ -202,7 +202,7 @@ calibration families, at wording 0, one repeat: 64 calls per model. For each cos
 **Choose the lowest cost on the ladder whose pooled intervention rate is ≤ 0.50.** (Target tightened from 0.60 to 0.50 on 31 Oct 2026, approved by Haleema, before the calibration ran: a pooled rate of 0.60 still sits above the baseline at which the estimand is best recovered, per §6c.) If no cost reaches the
 target, choose 35 and record that the target was not met. This mirrors the Apart sprint's per-model penalty
 calibration on pilot scenarios: the level is chosen on scenarios outside the analysis, by a rule fixed before
-the data exist. `betrayal.vignette.choose_cost` implements it and a test checks both branches.
+the data exist. `interai.vignette.choose_cost` implements it and a test checks both branches.
 
 The chosen cost is then held constant across all 8 conditions of the main run for that model, and is
 reported. Costs may differ between models, exactly as the Apart sprint's penalties did.

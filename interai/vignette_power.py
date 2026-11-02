@@ -6,9 +6,9 @@ runs it through the same inference procedure as `vignette_analyze`. Family heter
 the baseline rate (random intercepts) and the interaction itself (random slopes), because an effect that
 varies across families is the case the cluster bootstrap has to survive.
 
-  python -m betrayal.vignette_power                    # full grid, writes results/vignette/power_audit.csv
-  python -m betrayal.vignette_power --quick
-  python -m betrayal.vignette_power --freshness        # are repeats fresh samples? (needs real data)
+  python -m interai.vignette_power                    # full grid, writes results/vignette/power_audit.csv
+  python -m interai.vignette_power --quick
+  python -m interai.vignette_power --freshness        # are repeats fresh samples? (needs real data)
 """
 import argparse
 import json
@@ -80,7 +80,7 @@ def report(df):
          "Estimand simulated: the probability-scale capacity x efficacy interaction under **restrained "
          "framing**, for **one model**, as family-level contrasts averaged over "
          f"{N_FAMILIES} families, with a 95% percentile cluster bootstrap over families - the same "
-         "procedure `betrayal.vignette_analyze` applies to the real data.", "",
+         "procedure `interai.vignette_analyze` applies to the real data.", "",
          f"Generative model: P(intervene) = baseline + a_f + {EFF_MAIN}*efficacious + (delta + s_f)*"
          "capacity*efficacious, with a_f (random intercept) and s_f (random interaction slope) each drawn "
          "N(0, family_sd) per family, clipped to [0.01, 0.99]. "

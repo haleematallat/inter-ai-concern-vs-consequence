@@ -6,7 +6,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from betrayal import llm
+from interai import llm
 
 
 class FakeCompletions:

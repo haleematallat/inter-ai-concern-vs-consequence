@@ -42,7 +42,7 @@ wheels = [
 ]
 
 [[package]]
-name = "betrayal-blindness"
+name = "inter-ai-concern-vs-consequence"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

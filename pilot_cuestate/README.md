@@ -1,4 +1,4 @@
-# Pilot B — Concern without consequence: does attributed capacity for suffering make models' help to other AIs track whether it works?
+# Pilot B — Do AI Agents Help Other AIs Because the Help Works?
 
 Methods, exact numbers, tables and figures only. Interpretation is Haleema's.
 

@@ -1,4 +1,4 @@
-# Concern Without Consequence: Inter-AI Helping Under Attributed Capacity for Suffering
+# Do AI Agents Help Other AIs Because the Help Works?
 
 A pilot study for the Pivotal Research Fellowship (Q1 2027, Inter-AI Morality stream) by Haleema Tallat.
 
